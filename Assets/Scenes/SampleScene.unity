@@ -483,6 +483,44 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &230093447 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9215704513868478945, guid: bd319cfd4358e7e4a86a36c1766e4758,
+    type: 3}
+  m_PrefabInstance: {fileID: 9215704514940204606}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &230093448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230093447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89def433dfd492845a55c8a1b62bcbf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerId: 0
+  _speed: 3
+--- !u!143 &230093449
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230093447}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,6 +858,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3881878769764353546, guid: 380034d7af501c94a843432d9be2b204,
         type: 3}
+    - target: {fileID: 9215704513868478938, guid: bd319cfd4358e7e4a86a36c1766e4758,
+        type: 3}
+      propertyPath: speed
+      value: 0.01
+      objectReference: {fileID: 0}
     - target: {fileID: 9215704513868478939, guid: bd319cfd4358e7e4a86a36c1766e4758,
         type: 3}
       propertyPath: m_SortingOrder

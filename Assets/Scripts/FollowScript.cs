@@ -11,12 +11,12 @@ public class FollowScript : MonoBehaviour
     private Vector3 velocity;
     public float dampTime = 0.3f;
     private Transform target;
-    static int numOfPastVelocities = 5;
+    static int numOfPastVelocities = 25;
     private Vector3[] pastVelocities = new Vector3[numOfPastVelocities];
     public float speed;
     static int numOfFutureFrames = 25;
     private Vector3[] futureVelocities = new Vector3[numOfFutureFrames];
-    private Queue<GameObject> pastDots = new Queue<GameObject>();
+    private List<GameObject> pastDots = new List<GameObject>();
     private List<GameObject> futureDots = new List<GameObject>();
     private float timerValue = 0.2f;
     private float currentTimer;
@@ -39,8 +39,7 @@ public class FollowScript : MonoBehaviour
         Debug.Log(velocity);
         //velocity = inputVector * 8 * Time.deltaTime;
 
-        SavePastPositions(inputVector);
-        
+        SavePastPositions(inputVector);    
         CalculateFuturePositions(inputVector);
     }
 
@@ -56,23 +55,18 @@ public class FollowScript : MonoBehaviour
 
     public void DrawPastDots()
     {
-        if (currentTimer > timerValue)
+        foreach (GameObject pastDot in pastDots)
+        {
+            Destroy(pastDot);
+        }
+
+        pastDots.Clear();
+
+        for (int i = 0; i < 5; i++)
         {
             GameObject dot = Instantiate(Dot);
-            dot.transform.position = new Vector3(pastVelocities[0].x, 0.1f, pastVelocities[0].z);
-            pastDots.Enqueue(dot);
-
-            if (pastDots.Count == numOfPastVelocities)
-            {
-                Destroy(pastDots.First());
-                pastDots.Dequeue();
-            }
-
-            currentTimer = 0;
-        }
-        else
-        {
-            currentTimer += Time.deltaTime;
+            pastDots.Add(dot);
+            dot.transform.position = new Vector3(pastVelocities[5 * i].x, 0.1f, pastVelocities[5 * i].z);
         }
     }
 
@@ -99,6 +93,9 @@ public class FollowScript : MonoBehaviour
         float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref velocity.y, dampTime );
         float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref velocity.z, dampTime );
 
+        if (inputVector == Vector3.zero)
+            velocity = Vector3.zero;
+
         //transform.position = new Vector3(newX, newY, newZ);
         transform.position += velocity * speed;
 
@@ -108,7 +105,6 @@ public class FollowScript : MonoBehaviour
         }
 
         DrawPastDots();
-
         pastVelocities[0] = (new Vector3(newX, newY, newZ));
     }
 

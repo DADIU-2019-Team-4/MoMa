@@ -861,12 +861,12 @@ PrefabInstance:
     - target: {fileID: 9215704513868478938, guid: bd319cfd4358e7e4a86a36c1766e4758,
         type: 3}
       propertyPath: speed
-      value: 0.1
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 9215704513868478938, guid: bd319cfd4358e7e4a86a36c1766e4758,
         type: 3}
       propertyPath: dampTime
-      value: 0.5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 9215704513868478939, guid: bd319cfd4358e7e4a86a36c1766e4758,
         type: 3}
@@ -877,6 +877,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_CastShadows
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9215704513868478939, guid: bd319cfd4358e7e4a86a36c1766e4758,
+        type: 3}
+      propertyPath: m_Time
+      value: 0.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bd319cfd4358e7e4a86a36c1766e4758, type: 3}

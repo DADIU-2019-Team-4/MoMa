@@ -7,15 +7,17 @@ public class FollowScript : MonoBehaviour
     public GameObject objectToFollow;
     private Rigidbody rb;
     private Vector3 velocity;
-    public float dampTime = 0.3f;
+    private float dampTime = 0.3f;
     private Transform target;
+    static int numOfPastVelocities = 5;
+    private Vector3[] pastVelocities = new Vector3[numOfPastVelocities];
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         velocity = new Vector3();
-        
+
     }
 
     // Update is called once per frame
@@ -26,9 +28,17 @@ public class FollowScript : MonoBehaviour
         float newY = Mathf.SmoothDamp(transform.position.y, objectToFollow.transform.position.y, ref velocity.y, dampTime);
         float newZ = Mathf.SmoothDamp(transform.position.z, objectToFollow.transform.position.z, ref velocity.z, dampTime);
 
-        transform.position = new Vector3(newX,newY,newZ);
+        transform.position = new Vector3(newX, newY, newZ);
 
-        Debug.DrawLine(transform.position, target.position);
+
+
+        for (int i = numOfPastVelocities-1; i > 0; i--)
+        {
+            pastVelocities[i] = pastVelocities[i - 1];
+        }
+        pastVelocities[0] = (new Vector3(newX, newY, newZ));
+        
+        
     }
 
     void OnDrawGizmosSelected()
@@ -37,7 +47,7 @@ public class FollowScript : MonoBehaviour
         {
             // Draws a blue line from this transform to the target
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, transform.position + new Vector3(50,50,50));
+            Gizmos.DrawLine(transform.position, transform.position + new Vector3(50, 50, 50));
         }
     }
 }

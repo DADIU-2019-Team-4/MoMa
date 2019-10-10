@@ -9,7 +9,7 @@ public class FollowScript : MonoBehaviour
     public GameObject Dot;
     private Rigidbody rb;
     private Vector3 velocity;
-    private float dampTime = 0.3f;
+    public float dampTime = 0.3f;
     private Transform target;
     static int numOfPastVelocities = 5;
     private Vector3[] pastVelocities = new Vector3[numOfPastVelocities];
@@ -35,6 +35,8 @@ public class FollowScript : MonoBehaviour
         //target = objectToFollow.transform;
        // Vector3 inputVector = Vector3.Normalize(objectToFollow.transform.position - transform.position);
         Vector3 inputVector = GetComponent<MovementController>().GetInput();
+        //Debug.Log(inputVector.ToString());
+        Debug.Log(velocity);
         //velocity = inputVector * 8 * Time.deltaTime;
 
         SavePastPositions(inputVector);
@@ -93,9 +95,9 @@ public class FollowScript : MonoBehaviour
 
     public void SavePastPositions(Vector3 inputVector)
     {
-        float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref velocity.x, dampTime * Time.deltaTime);
-        float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref velocity.y, dampTime * Time.deltaTime);
-        float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref velocity.z, dampTime * Time.deltaTime);
+        float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref velocity.x, dampTime );
+        float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref velocity.y, dampTime );
+        float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref velocity.z, dampTime );
 
         //transform.position = new Vector3(newX, newY, newZ);
         transform.position += velocity * speed;
@@ -117,16 +119,16 @@ public class FollowScript : MonoBehaviour
 
         for(int i =0; i< numOfFutureFrames; i++)
         {
-            float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref futureVel.x, dampTime * Time.deltaTime);
-            float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref futureVel.y, dampTime * Time.deltaTime);
-            float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref futureVel.z, dampTime * Time.deltaTime);
+            float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref futureVel.x, dampTime);
+            float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref futureVel.y, dampTime);
+            float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref futureVel.z, dampTime);
 
             //transform.position = new Vector3(newX, newY, newZ);
             futureVelocities[i] = futurePos = futurePos + futureVel * speed;
         }
 
         DrawFutureDots();
-        Debug.Log(futureVelocities[0].ToString());
+        //Debug.Log(futureVelocities[0].ToString());
     }
 
     

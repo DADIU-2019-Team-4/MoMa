@@ -20,8 +20,8 @@ public class MovementController : MonoBehaviour
 
     private void HandleInput()
     {
-        _direction.x = _player.GetAxis("Move Horizontal");
-        _direction.z = _player.GetAxis("Move Vertical");
+        _direction.x = _player.GetAxisRaw("Move Horizontal");
+        _direction.z = _player.GetAxisRaw("Move Vertical");
 
         //_characterController.Move(_direction * _speed * Time.deltaTime);
     }

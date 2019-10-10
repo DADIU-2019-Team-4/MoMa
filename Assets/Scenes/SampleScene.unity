@@ -861,7 +861,12 @@ PrefabInstance:
     - target: {fileID: 9215704513868478938, guid: bd319cfd4358e7e4a86a36c1766e4758,
         type: 3}
       propertyPath: speed
-      value: 0.01
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9215704513868478938, guid: bd319cfd4358e7e4a86a36c1766e4758,
+        type: 3}
+      propertyPath: dampTime
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9215704513868478939, guid: bd319cfd4358e7e4a86a36c1766e4758,
         type: 3}

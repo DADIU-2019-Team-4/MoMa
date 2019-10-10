@@ -119,9 +119,9 @@ public class FollowScript : MonoBehaviour
 
         for(int i =0; i< numOfFutureFrames; i++)
         {
-            float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref futureVel.x, dampTime);
-            float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref futureVel.y, dampTime);
-            float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref futureVel.z, dampTime);
+            float newX = Mathf.SmoothDamp(futurePos.x, futurePos.x + inputVector.x, ref futureVel.x, dampTime);
+            float newY = Mathf.SmoothDamp(futurePos.y, futurePos.y + inputVector.y, ref futureVel.y, dampTime);
+            float newZ = Mathf.SmoothDamp(futurePos.z, futurePos.z + inputVector.z, ref futureVel.z, dampTime);
 
             //transform.position = new Vector3(newX, newY, newZ);
             futureVelocities[i] = futurePos = futurePos + futureVel * speed;

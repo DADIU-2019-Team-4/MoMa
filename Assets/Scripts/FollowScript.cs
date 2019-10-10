@@ -1,16 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class FollowScript : MonoBehaviour
 {
     public GameObject objectToFollow;
+    public GameObject Dot;
     private Rigidbody rb;
     private Vector3 velocity;
     private float dampTime = 0.3f;
     private Transform target;
     static int numOfPastVelocities = 5;
     private Vector3[] pastVelocities = new Vector3[numOfPastVelocities];
+    private Queue<GameObject> dots = new Queue<GameObject>();
+    private float timerValue = 0.2f;
+    private float currentTimer;
 
     // Start is called before the first frame update
     void Start()
@@ -30,15 +35,32 @@ public class FollowScript : MonoBehaviour
 
         transform.position = new Vector3(newX, newY, newZ);
 
-
-
         for (int i = numOfPastVelocities-1; i > 0; i--)
         {
             pastVelocities[i] = pastVelocities[i - 1];
         }
+
+        if (currentTimer > timerValue)
+        {
+            GameObject dot = Instantiate(Dot);
+            dot.transform.position = new Vector3(pastVelocities[0].x, 0.1f, pastVelocities[0].z);
+            dots.Enqueue(dot);
+
+            if (dots.Count == numOfPastVelocities)
+            {
+                Destroy(dots.First());
+                dots.Dequeue();
+            }
+
+            currentTimer = 0;
+        }
+        else
+        {
+            currentTimer += Time.deltaTime;
+        }
+
         pastVelocities[0] = (new Vector3(newX, newY, newZ));
-        
-        
+
     }
 
     void OnDrawGizmosSelected()

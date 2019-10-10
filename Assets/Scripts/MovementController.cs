@@ -23,12 +23,17 @@ public class MovementController : MonoBehaviour
         _direction.x = _player.GetAxis("Move Horizontal");
         _direction.z = _player.GetAxis("Move Vertical");
 
-        _characterController.Move(_direction * _speed * Time.deltaTime);
+        //_characterController.Move(_direction * _speed * Time.deltaTime);
     }
 
     // Update is called once per frame
     void Update()
     {
         HandleInput();
+    }
+
+    public Vector3 GetInput()
+    {
+        return _direction;
     }
 }

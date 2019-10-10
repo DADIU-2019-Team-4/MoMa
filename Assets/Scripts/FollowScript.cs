@@ -11,6 +11,9 @@ public class FollowScript : MonoBehaviour
     private Transform target;
     static int numOfPastVelocities = 5;
     private Vector3[] pastVelocities = new Vector3[numOfPastVelocities];
+    public float speed;
+    static int numOfFutureFrames = 5;
+    private Vector3[] futureVelocities = new Vector3[numOfFutureFrames];
 
     // Start is called before the first frame update
     void Start()
@@ -23,13 +26,17 @@ public class FollowScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        target = objectToFollow.transform;
-        float newX = Mathf.SmoothDamp(transform.position.x, objectToFollow.transform.position.x, ref velocity.x, dampTime);
-        float newY = Mathf.SmoothDamp(transform.position.y, objectToFollow.transform.position.y, ref velocity.y, dampTime);
-        float newZ = Mathf.SmoothDamp(transform.position.z, objectToFollow.transform.position.z, ref velocity.z, dampTime);
+        //target = objectToFollow.transform;
+       // Vector3 inputVector = Vector3.Normalize(objectToFollow.transform.position - transform.position);
+        Vector3 inputVector = GetComponent<MovementController>().GetInput();
+        //velocity = inputVector * 8 * Time.deltaTime;
+        float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref velocity.x, dampTime *Time.deltaTime);
+        float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref velocity.y, dampTime * Time.deltaTime);
+        float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref velocity.z, dampTime * Time.deltaTime);
 
-        transform.position = new Vector3(newX, newY, newZ);
-
+        //transform.position = new Vector3(newX, newY, newZ);
+        transform.position += velocity*speed;
+        //Debug.Log(velocity*speed);
 
 
         for (int i = numOfPastVelocities-1; i > 0; i--)
@@ -37,8 +44,8 @@ public class FollowScript : MonoBehaviour
             pastVelocities[i] = pastVelocities[i - 1];
         }
         pastVelocities[0] = (new Vector3(newX, newY, newZ));
-        
-        
+
+        CalculateFuturePositions(inputVector);
     }
 
     void OnDrawGizmosSelected()
@@ -50,4 +57,24 @@ public class FollowScript : MonoBehaviour
             Gizmos.DrawLine(transform.position, transform.position + new Vector3(50, 50, 50));
         }
     }
+
+    public void CalculateFuturePositions(Vector3 inputVector)
+    {
+        Vector3 futurePos = transform.position;
+        Vector3 futureVel = velocity;
+
+        for(int i =0; i< numOfFutureFrames; i++)
+        {
+            float newX = Mathf.SmoothDamp(transform.position.x, transform.position.x + inputVector.x, ref futureVel.x, dampTime * Time.deltaTime);
+            float newY = Mathf.SmoothDamp(transform.position.y, transform.position.y + inputVector.y, ref futureVel.y, dampTime * Time.deltaTime);
+            float newZ = Mathf.SmoothDamp(transform.position.z, transform.position.z + inputVector.z, ref futureVel.z, dampTime * Time.deltaTime);
+
+            //transform.position = new Vector3(newX, newY, newZ);
+            futureVelocities[i] = futurePos = futurePos + futureVel * speed;
+        }
+
+        Debug.Log(futureVelocities[0].ToString());
+    }
+
+    
 }

@@ -1,13 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class FollowScript : MonoBehaviour
 {
-    public GameObject objectToFollow;
     public GameObject Dot;
-    private Rigidbody rb;
     private Vector3 velocity;
     public float dampTime = 0.3f;
     private Transform target;
@@ -25,34 +21,16 @@ public class FollowScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
         velocity = new Vector3();
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        //target = objectToFollow.transform;
-       // Vector3 inputVector = Vector3.Normalize(objectToFollow.transform.position - transform.position);
         Vector3 inputVector = GetComponent<MovementController>().GetInput();
-        Debug.Log(inputVector.ToString());
-        //Debug.Log(inputVector.ToString());
-        //Debug.Log(velocity);
-        //velocity = inputVector * 8 * Time.deltaTime;
 
         SavePastPositions(inputVector);    
         CalculateFuturePositions(inputVector);
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        if (target != null)
-        {
-            // Draws a blue line from this transform to the target
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, transform.position + new Vector3(50, 50, 50));
-        }
     }
 
     public void DrawPastDots()
@@ -120,6 +98,7 @@ public class FollowScript : MonoBehaviour
             futurePos = futurePos + futureVel * speed;
             futureVelocities[i] = futurePos;
         }
+
         DrawFutureDots();
     }
 

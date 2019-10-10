@@ -17,7 +17,7 @@ public class FollowScript : MonoBehaviour
     static int numOfFutureFrames = 25;
     private Vector3[] futureVelocities = new Vector3[numOfFutureFrames];
     private Queue<GameObject> pastDots = new Queue<GameObject>();
-    private Queue<GameObject> futureDots = new Queue<GameObject>();
+    private List<GameObject> futureDots = new List<GameObject>();
     private float timerValue = 0.2f;
     private float currentTimer;
 
@@ -76,23 +76,18 @@ public class FollowScript : MonoBehaviour
 
     public void DrawFutureDots()
     {
-        if (currentTimer > timerValue)
+        foreach (GameObject futureDot in futureDots)
+        {
+            Destroy(futureDot);
+        }
+
+        futureDots.Clear();
+
+        for (int i = 0; i < 5; i++)
         {
             GameObject dot = Instantiate(Dot);
-            dot.transform.position = new Vector3(futureVelocities[24].x, 0.1f, futureVelocities[24].z);
-            futureDots.Enqueue(dot);
-
-            if (futureDots.Count == 5)
-            {
-                Destroy(futureDots.First());
-                futureDots.Dequeue();
-            }
-
-            currentTimer = 0;
-        }
-        else
-        {
-            currentTimer += Time.deltaTime;
+            futureDots.Add(dot);
+            dot.transform.position = new Vector3(futureVelocities[5 * i].x, 0.1f, futureVelocities[5 * i].z);
         }
     }
 

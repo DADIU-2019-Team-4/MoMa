@@ -5,7 +5,9 @@ public class FollowScript : MonoBehaviour
 {
     public GameObject Dot;
     private Vector3 velocity;
-    public float dampTime = 0.3f;
+    public float defaultDampTime;
+    public float stopDampTime;
+    public float dampTime;
     private Transform target;
     static int numOfPastVelocities = 50;
     private Vector3[] pastVelocities = new Vector3[numOfPastVelocities];
@@ -29,7 +31,8 @@ public class FollowScript : MonoBehaviour
     {
         Vector3 inputVector = GetComponent<MovementController>().GetInput();
 
-        SavePastPositions(inputVector);    
+        Move(inputVector);
+        SavePastPositions();    
         CalculateFuturePositions(inputVector);
     }
 
@@ -67,16 +70,29 @@ public class FollowScript : MonoBehaviour
         }
     }
 
-    public void SavePastPositions(Vector3 inputVector)
+    public void Move(Vector3 inputVector)
     {
-        Vector3.SmoothDamp(transform.position, (transform.position + inputVector), ref velocity, dampTime );
-        
         if (inputVector == Vector3.zero)
-            velocity = Vector3.zero;
+        {
+            dampTime = stopDampTime;
+        }
+        else
+        {
+            dampTime = defaultDampTime;
+        }
+            
+
+
+        Vector3.SmoothDamp(transform.position, (transform.position + inputVector), ref velocity, dampTime);
+
         
+
         transform.position += velocity * speed;
+    }
 
-
+    public void SavePastPositions()
+    {
+        
         for (int i = numOfPastVelocities - 1; i > 0; i--)
         {
             pastVelocities[i] = pastVelocities[i - 1];

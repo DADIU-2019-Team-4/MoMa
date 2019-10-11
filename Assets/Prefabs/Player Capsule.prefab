@@ -110,8 +110,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a18ab33bf52b45246ad730275596a0ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectToFollow: {fileID: 0}
   Dot: {fileID: 3881878769764353546, guid: 380034d7af501c94a843432d9be2b204, type: 3}
+  defaultDampTime: 7
+  stopDampTime: 0.4
   dampTime: 7
   speed: 2.5
 --- !u!96 &9215704513868478939

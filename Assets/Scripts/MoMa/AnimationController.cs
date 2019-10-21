@@ -66,8 +66,6 @@ namespace MoMa
             Frame frame = this._clip.Step();
             Quaternion rotation = this._model.rotation;
 
-            Debug.Log(rotation);
-
             foreach (Bone.Type bone in this._bones.Keys)
             {
                 // This changes the rig to the one used by Rokoko

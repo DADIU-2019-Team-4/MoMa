@@ -39,10 +39,11 @@ namespace MoMa
                 _direction,
                 ref _velocity
                 );
+
             // Move to target position
             transform.position += _velocity * Speed;
 
-            // Rotate to face the direcction moving
+            // Rotate to face the direction moving
             Vector2 direction = _velocity.GetXZVector2().normalized;
             float rotationAngle = Vector2.SignedAngle(Vector2.up, direction);
             _model.eulerAngles = new Vector3(0, -rotationAngle, 0);
@@ -56,7 +57,7 @@ namespace MoMa
                 transform.position.y,
                 transform.position.z
                 );
-            Vector3 simulatedVelocity = new Vector3();
+            Vector3 simulatedVelocity = new Vector3(_velocity.x, _velocity.y, _velocity.z);
             List<Vector3> future = new List<Vector3>();
 
             for (int i = 0; i < afterFrames; i++)

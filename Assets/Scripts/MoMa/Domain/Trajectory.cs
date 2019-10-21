@@ -72,6 +72,11 @@ namespace MoMa
                 this.x = x;
                 this.z = z;
             }
+
+            public override string ToString()
+            {
+                return "[" + this.x + ", " + this.z + "]";
+            }
         }
 
         public class Snippet

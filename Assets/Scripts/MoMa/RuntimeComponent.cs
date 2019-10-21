@@ -19,7 +19,8 @@ namespace MoMa
         {
             // TODO: This should happen offline. Instead we only need to open its result
             //this._anim = Packer.Pack("throwing", "MoCapData", "take-1_DEFAULT_C36", 5, 10, 10);
-            this._anim = Packer.Pack("throwing", "MoCapData", "Sample project_scene-1_WalkSimple_DEFAULT_E46");
+            //this._anim = Packer.Pack("throwing", "MoCapData", "Sample project_scene-1_WalkSimple_DEFAULT_E46");
+            this._anim = Packer.Pack("throwing", "MoCapData", "walk_DEFAULT_FIX");
 
             if (this._anim.featureList.Count == 0)
             {

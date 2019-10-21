@@ -15,6 +15,9 @@ namespace MoMa
             // Load the raw Animation data from the specified file
             Packer.LoadRawAnimationFromFile(anim, directory, filename);
 
+            // Compute the velocity of every Bone in every Frame
+            ComputeVelocities(anim);
+
             // Compute the feature Frames
             anim.ComputeFeatures();
 
@@ -77,6 +80,32 @@ namespace MoMa
 
             // Unload Asset to free Memory
             Resources.UnloadAsset(moCapAsset);
+        }
+
+        private static void ComputeVelocities(Animation anim)
+        {
+            // Validate input
+            if (anim.frameList.Count < 2)
+            {
+                Debug.LogError("The Animation does not have enough Frames to compute velocities");
+                throw new Exception("The Animation does not have enough Frames to compute velocities");
+            }
+
+            // For every bone of the Animation
+            foreach (Bone.Type bt in Enum.GetValues(typeof(Bone.Type)))
+            {
+                // Find the position of the first frame
+                Vector3 lastPosition = anim.frameList[0].boneDataDict[bt].position;
+
+                foreach (Frame frame in anim.frameList)
+                {
+                    frame.boneDataDict[bt].velocity = (frame.boneDataDict[bt].position - lastPosition);
+                }
+
+                // Set the velocity of the first Frame equal to the one in the second
+                // That is because it is currently 0 and it is probably very close to the one in the second Frame
+                anim.frameList[0].boneDataDict[bt].velocity = anim.frameList[1].boneDataDict[bt].velocity;
+            }
         }
     }
 }

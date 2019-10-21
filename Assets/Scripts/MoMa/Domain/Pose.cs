@@ -1,36 +1,45 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace MoMa
 {
     public class Pose
     {
         // Position of limbs relative to the root
-        // TODO: Add hands and velocity (hands, feet and root!)
-        public Vector3 leftFootPosition;
-        public Vector3 rightFootPosition;
-        public Vector3 leftHandPosition;
-        public Vector3 rightHandPosition;
+        public IDictionary<Bone.Type, Limb> limbDataDict = new Dictionary<Bone.Type, Limb>();
 
         public Pose(Frame frame)
         {
-            this.leftFootPosition = frame.boneDataDict[Bone.Type.leftFoot].position;
-            this.rightFootPosition = frame.boneDataDict[Bone.Type.rightFoot].position;
-            this.leftHandPosition = frame.boneDataDict[Bone.Type.leftHand].position;
-            this.rightHandPosition = frame.boneDataDict[Bone.Type.rightHand].position;
+            foreach (Bone.Type bone in new Bone.Type[] { Bone.Type.hips, Bone.Type.leftFoot, Bone.Type.rightFoot, Bone.Type.leftHand, Bone.Type.rightHand} )
+            {
+                limbDataDict.Add(bone, new Limb(frame.boneDataDict[bone].position, frame.boneDataDict[bone].velocity));
+            }
         }
 
-        public float CalcDiff(Pose candidateFeature)
+        public float CalcDiff(Pose candidate)
         {
             float diff = 0f;
 
-            diff += Mathf.Pow((this.leftFootPosition - candidateFeature.leftFootPosition).magnitude, 2);
-            diff += Mathf.Pow((this.rightFootPosition - candidateFeature.rightFootPosition).magnitude, 2);
-            diff += Mathf.Pow((this.leftHandPosition - candidateFeature.leftHandPosition).magnitude, 2);
-            diff += Mathf.Pow((this.rightHandPosition - candidateFeature.rightHandPosition).magnitude, 2);
+            foreach (Bone.Type bone in limbDataDict.Keys)
+            {
+                diff += Mathf.Pow(this.limbDataDict[bone].position.magnitude - candidate.limbDataDict[bone].position.magnitude, 2);
+                diff += Mathf.Pow(this.limbDataDict[bone].velocity.magnitude - candidate.limbDataDict[bone].velocity.magnitude, 2);
+            }
 
             return diff;
         }
 
+        public class Limb
+        {
+            public Vector3 position;
+            public Vector3 velocity;
+
+            public Limb(Vector3 position, Vector3 velocity)
+            {
+                this.position = position;
+                this.velocity = velocity;
+            }
         }
+    }
 }

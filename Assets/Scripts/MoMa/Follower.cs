@@ -42,16 +42,13 @@ namespace MoMa
 
             foreach (Trajectory.Point point in snippet.points)
             {
-                // Translate
-                Vector3 dotPosition = new Vector3(
+                GameObject dot = Instantiate(Dot);
+                dot.transform.position = new Vector3(
                     point.x + this._model.position.x,
                     0.1f,
                     point.z + this._model.position.z
                     );
-
-                GameObject dot = Instantiate(Dot);
                 _dots.Add(dot);
-                dot.transform.position = dotPosition;
             }
         }
     }

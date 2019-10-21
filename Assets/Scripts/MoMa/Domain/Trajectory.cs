@@ -81,8 +81,8 @@ namespace MoMa
 
         public class Snippet
         {
-            public const int FuturePoints = 15;
-            public const int PastPoints = 10;
+            public const int FuturePoints = 12;
+            public const int PastPoints = 7;
 
             public Point[] points = new Point[PastPoints + FuturePoints];
 

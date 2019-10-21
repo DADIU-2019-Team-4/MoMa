@@ -57,6 +57,10 @@ namespace MoMa
             // If the current Clip is over, request a new one
             if (this._clip.isOver())
             {
+                // Set current point to Trajectory's most recent past. Remove the oldest past point
+                this._trajectory.points.Add(new Trajectory.Point(this._model.position.x, this._model.position.z));
+                this._trajectory.points.RemoveAt(0);
+
                 Trajectory.Snippet snippet = GetCurrentSnippet();
                 this._clip = this._rc.QueryClip(snippet);
                 this._follower.Draw(snippet);
@@ -73,8 +77,10 @@ namespace MoMa
 
                 // This keeps the rig's proportions
                 this._bones[bone].rotation = frame.boneDataDict[bone].rotation;
+                
             }
-            this._model.rotation = rotation;
+
+            this._model.localRotation = Quaternion.Inverse(frame.boneDataDict[Bone.Type.hips].rotation);
         }
 
         private Trajectory.Snippet GetCurrentSnippet()

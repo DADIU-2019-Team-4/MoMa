@@ -7,7 +7,7 @@ namespace MoMa
 {
     public class RuntimeComponent
     {
-        private const float RecalculationThreshold = 0.5f; // The maximum diff of two Trajectories before recalculating the Animation
+        private const float RecalculationThreshold = 0.7f; // The maximum diff of two Trajectories before recalculating the Animation
         private const int CooldownTime = 5; // Number of frames that a Frame is on cooldown after being played
         private const int CandidateFramesSize = 20; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
 

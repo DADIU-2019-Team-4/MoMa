@@ -31,7 +31,7 @@ namespace MoMa
 
         public void Draw(Trajectory.Snippet snippet)
         {
-            //Debug.DrawLine();
+            Debug.Log(snippet.points.Length);
 
             foreach (GameObject dot in _dots)
             {
@@ -45,12 +45,9 @@ namespace MoMa
                 // Translate
                 Vector3 dotPosition = new Vector3(
                     point.x + this._model.position.x,
-                    0,
+                    0.1f,
                     point.z + this._model.position.z
                     );
-
-                // Rotate
-                //dotPosition.Rotate(Quaternion.Inverse(this._model.rotation).eulerAngles.x);
 
                 GameObject dot = Instantiate(Dot);
                 _dots.Add(dot);

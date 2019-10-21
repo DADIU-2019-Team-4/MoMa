@@ -12,10 +12,7 @@ GameObject:
   - component: {fileID: 9215704513868478940}
   - component: {fileID: 9215704513868478943}
   - component: {fileID: 9215704513868478942}
-  - component: {fileID: 9215704513868478938}
   - component: {fileID: 9215704513868478939}
-  - component: {fileID: 230093449}
-  - component: {fileID: 230093448}
   m_Layer: 0
   m_Name: Player Capsule
   m_TagString: Untagged
@@ -98,23 +95,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &9215704513868478938
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9215704513868478945}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a18ab33bf52b45246ad730275596a0ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Dot: {fileID: 3881878769764353546, guid: 380034d7af501c94a843432d9be2b204, type: 3}
-  defaultDampTime: 7
-  stopDampTime: 0.4
-  dampTime: 7
-  speed: 2.5
 --- !u!96 &9215704513868478939
 TrailRenderer:
   serializedVersion: 2
@@ -211,38 +191,6 @@ TrailRenderer:
   m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 1
---- !u!143 &230093449
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9215704513868478945}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &230093448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9215704513868478945}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89def433dfd492845a55c8a1b62bcbf2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerId: 0
-  _speed: 3
 --- !u!1 &9215704514513886031
 GameObject:
   m_ObjectHideFlags: 0

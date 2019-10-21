@@ -617,7 +617,7 @@ PrefabInstance:
     - target: {fileID: -927199367670048503, guid: 55c6f25897e90c2499924866a6f83f41,
         type: 3}
       propertyPath: m_Name
-      value: timmyRig01 (1)
+      value: Model
       objectReference: {fileID: 0}
     - target: {fileID: -927199367670048503, guid: 55c6f25897e90c2499924866a6f83f41,
         type: 3}
@@ -679,7 +679,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -6057140222963153312, guid: 55c6f25897e90c2499924866a6f83f41, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 55c6f25897e90c2499924866a6f83f41, type: 3}
 --- !u!1 &1171382432
 GameObject:

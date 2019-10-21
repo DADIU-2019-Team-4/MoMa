@@ -11,6 +11,7 @@ namespace MoMa
         private const string PlayerTag = "Player"; // The Tag that the Player's GameObject has in the game
 
         private IDictionary<Bone.Type, Transform> _bones;
+        private Transform _model;
         private RuntimeComponent _rc;
         private MovementController _mc;
         private Follower _follower;
@@ -22,15 +23,19 @@ namespace MoMa
         {
             // Find Model Object and attach to it
             this._mc = this.GetComponent(typeof(MovementController)) as MovementController;
-            GameObject model = GameObject.FindWithTag(PlayerTag);
-
-            if (model == null || this._mc == null)
+            GameObject go = GameObject.FindWithTag(PlayerTag);
+            
+            if (go == null || this._mc == null)
             {
                 Debug.LogError("Unable to find Model or MovementController");
                 throw new Exception("Unable to find Model or MovementController");
             }
+            else
+            {
+                this._model = go.transform.GetChild(0);
+            }
 
-            AttachToTransforms(model);
+            AttachToTransforms(this._model);
 
             // Initialize RuntimeComponent
             this._rc = new RuntimeComponent();
@@ -59,6 +64,9 @@ namespace MoMa
 
             // Play the next Frame of the Clip
             Frame frame = this._clip.Step();
+            Quaternion rotation = this._model.rotation;
+
+            Debug.Log(rotation);
 
             foreach (Bone.Type bone in this._bones.Keys)
             {
@@ -68,6 +76,7 @@ namespace MoMa
                 // This keeps the rig's proportions
                 this._bones[bone].rotation = frame.boneDataDict[bone].rotation;
             }
+            this._model.rotation = rotation;
         }
 
         private Trajectory.Snippet GetCurrentSnippet()
@@ -99,14 +108,14 @@ namespace MoMa
         }
 
         #region Rig-attaching methods
-        private void AttachToTransforms(GameObject model)
+        private void AttachToTransforms(Transform model)
         {
             // Create an empty Dictionary
             this._bones = new Dictionary<Bone.Type, Transform>();
 
             #region Load all _bones
             // Load core
-            this._bones.Add(Bone.Type.root, model.transform.GetChild(0));
+            this._bones.Add(Bone.Type.root, model);
             this._bones.Add(Bone.Type.hips, this._bones[Bone.Type.root].GetChild(0));
 
             // Load left foot
@@ -148,14 +157,14 @@ namespace MoMa
             #endregion
         }
 
-        private void AttachToNewtonTransforms(GameObject model)
+        private void AttachToNewtonTransforms(Transform model)
         {
             // Create an empty Dictionary
             this._bones = new Dictionary<Bone.Type, Transform>();
 
             #region Load all _bones
             // Load core
-            this._bones.Add(Bone.Type.root, model.transform);
+            this._bones.Add(Bone.Type.root, model);
             this._bones.Add(Bone.Type.hips, this._bones[Bone.Type.root].GetChild(0));
 
             // Load left foot

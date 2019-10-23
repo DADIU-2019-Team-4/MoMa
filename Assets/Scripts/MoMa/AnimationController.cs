@@ -23,8 +23,8 @@ namespace MoMa
         {
             // Find Model Object and attach to it
             this._mc = this.GetComponent(typeof(MovementController)) as MovementController;
-            GameObject go = GameObject.FindWithTag(PlayerTag);
-            
+            Transform go = this.gameObject.transform.GetChild(0);
+
             if (go == null || this._mc == null)
             {
                 Debug.LogError("Unable to find Model or MovementController");
@@ -73,11 +73,12 @@ namespace MoMa
             foreach (Bone.Type bone in this._bones.Keys)
             {
                 // This changes the rig to the one used by Rokoko
-                //this._bones[bone].SetPositionAndRotation(curFrame.boneDataDict[bone].position, curFrame.boneDataDict[bone].rotation);
+                //this._bones[bone].SetPositionAndRotation(frame.boneDataDict[bone].position, frame.boneDataDict[bone].rotation);
+                //this._bones[bone].SetPositionAndRotation(frame.boneDataDict[bone].localPosition, frame.boneDataDict[bone].rotation);
+                //this._bones[bone].position = frame.boneDataDict[bone].localPosition;
 
                 // This keeps the rig's proportions
                 this._bones[bone].rotation = frame.boneDataDict[bone].rotation;
-                
             }
 
             this._model.localRotation = Quaternion.Inverse(frame.boneDataDict[Bone.Type.hips].rotation);

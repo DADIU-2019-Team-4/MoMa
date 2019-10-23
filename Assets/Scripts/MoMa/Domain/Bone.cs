@@ -39,19 +39,33 @@ public class Bone
     {
         public Vector3 position;
         public Quaternion rotation;
-        public Vector3 velocity;
+        public Vector3 localPosition;
+        public Vector3 localVelocity;
 
-        //Debug
-        public Type boneType;
-
-        public Data(Type boneType, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float rotW)
+        public Data(Vector3 position, Quaternion rotation)
         {
-            this.boneType = boneType;
-            this.position = new Vector3(posX, posY, posZ);
-            this.rotation = new Quaternion(rotX, rotY, rotZ, rotW);
+            this.position = position;
+            this.rotation = rotation;
+        }
 
-            // TODO : Set the velocity to some high order polynomial of the actual velocity graph
-            this.velocity = new Vector3();
+        public void SetLocalPosition(Vector3 originPosition, Quaternion originRotation)
+        {
+            this.localPosition = Quaternion.Inverse(originRotation) * (this.position - originPosition);
+        }
+
+        // The next position refers to the next Feature Frame NOT actual Frame
+        public void SetLocalVelocity(Vector3 nextLocalPosition)
+        {
+            this.localVelocity = nextLocalPosition - this.localPosition;
+
+            if (this.localVelocity == Vector3.zero)
+            {
+                Debug.Log("LocalVelocity: 0");
+            }
+            else
+            {
+                Debug.Log("LocalVelocity: Non 0");
+            }
         }
     }
 }

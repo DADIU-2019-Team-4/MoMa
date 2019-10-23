@@ -15,8 +15,8 @@ namespace MoMa
             // Load the raw Animation data from the specified file
             Packer.LoadRawAnimationFromFile(anim, directory, filename);
 
-            // Compute the velocity of every Bone in every Frame
-            ComputeVelocities(anim);
+            // Compute the local position, rotation and velocity of every Bone in every Frame
+            ComputeLocalTranform(anim);
 
             // Compute the feature Frames
             anim.ComputeFeatures();
@@ -58,14 +58,17 @@ namespace MoMa
                 {
                     int off = (int)bt * 7;
                     Bone.Data currentBoneData = new Bone.Data(
-                        bt,
-                        float.Parse(dataFrame[off + 1]),    // Start from 1 because of the Timestamp on 0
-                        float.Parse(dataFrame[off + 2]),
-                        float.Parse(dataFrame[off + 3]),
-                        float.Parse(dataFrame[off + 4]),
-                        float.Parse(dataFrame[off + 5]),
-                        float.Parse(dataFrame[off + 6]),
-                        float.Parse(dataFrame[off + 7])
+                        new Vector3(
+                            float.Parse(dataFrame[off + 1]),    // Start from 1 because of the Timestamp on 0
+                            float.Parse(dataFrame[off + 2]),
+                            float.Parse(dataFrame[off + 3])
+                            ),
+                        new Quaternion(
+                            float.Parse(dataFrame[off + 4]),
+                            float.Parse(dataFrame[off + 5]),
+                            float.Parse(dataFrame[off + 6]),
+                            float.Parse(dataFrame[off + 7])
+                            )
                     );
 
                     // Create the new Frame
@@ -82,7 +85,7 @@ namespace MoMa
             Resources.UnloadAsset(moCapAsset);
         }
 
-        private static void ComputeVelocities(Animation anim)
+        private static void ComputeLocalTranform(Animation anim)
         {
             // Validate input
             if (anim.frameList.Count < 2)
@@ -91,20 +94,42 @@ namespace MoMa
                 throw new Exception("The Animation does not have enough Frames to compute velocities");
             }
 
-            // For every bone of the Animation
+            // Find local Positions
+            foreach (Frame frame in anim.frameList)
+            {
+                // Root's (hips) Position and Rotation
+                Vector3 rootP = frame.boneDataDict[Bone.Type.hips].position;
+                Quaternion rootQ = frame.boneDataDict[Bone.Type.hips].rotation;
+
+                // For every bone of the Animation
+                foreach (Bone.Type bt in Enum.GetValues(typeof(Bone.Type)))
+                {
+                    // Local position considers root as 0 and root's up as up
+                    frame.boneDataDict[bt].SetLocalPosition(rootP, rootQ);
+                }
+            }
+
+            // Find local Velocity
             foreach (Bone.Type bt in Enum.GetValues(typeof(Bone.Type)))
             {
                 // Find the position of the first frame
-                Vector3 lastPosition = anim.frameList[0].boneDataDict[bt].position;
+                Vector3 lastLocalPosition;
 
-                foreach (Frame frame in anim.frameList)
+                for (int i=Feature.FramesPerPoint; i < anim.frameList.Count; i++)
                 {
-                    frame.boneDataDict[bt].velocity = (frame.boneDataDict[bt].position - lastPosition);
+                    // Local velocity 
+                    lastLocalPosition = anim.frameList[i - Feature.FramesPerPoint].boneDataDict[bt].localPosition;
+                    anim.frameList[i].boneDataDict[bt].SetLocalVelocity(lastLocalPosition);
                 }
 
-                // Set the velocity of the first Frame equal to the one in the second
-                // That is because it is currently 0 and it is probably very close to the one in the second Frame
-                anim.frameList[0].boneDataDict[bt].velocity = anim.frameList[1].boneDataDict[bt].velocity;
+                // Set the velocity of the first Frames equal to the one in the seconds
+                // That is because they are currently 0 and it is probably very close to the ones in the seconds Frames
+                lastLocalPosition = anim.frameList[Feature.FramesPerPoint].boneDataDict[bt].localPosition;
+
+                for (int i = 0; i < Feature.FramesPerPoint && i < anim.frameList.Count; i++)
+                {
+                    anim.frameList[i].boneDataDict[bt].SetLocalVelocity(lastLocalPosition);
+                }
             }
         }
     }

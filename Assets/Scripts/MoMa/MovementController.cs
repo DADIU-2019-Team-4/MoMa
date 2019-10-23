@@ -7,9 +7,10 @@ namespace MoMa
 {
     public class MovementController : MonoBehaviour
     {
-        public const float DefaultDampTime = 5f;
-        public const float StopDampTime = 2f;
-        public const float Speed = 1f;
+        public const float DefaultDampTime = 4f;
+        public const float StopDampTime = 4f;
+        public const float Speed = 0.063f;
+        //public const float Speed = 0.6f;
         public const string ModelName = "Model";
 
         public int playerId = 0;

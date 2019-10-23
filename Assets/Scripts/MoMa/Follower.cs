@@ -31,8 +31,6 @@ namespace MoMa
 
         public void Draw(Trajectory.Snippet snippet)
         {
-            Debug.Log(snippet.points.Length);
-
             foreach (GameObject dot in _dots)
             {
                 Destroy(dot);

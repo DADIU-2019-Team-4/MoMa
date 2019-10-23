@@ -8,7 +8,7 @@ namespace MoMa
         // Animation.Frames per Trajectory.Point
         // The lower the number, the denser the Trajectory points will be.
         // That means closer approximation of the actual Trajectory and slower search for a Snippet
-        public const int FramesPerPoint = 5;
+        public const int FramesPerPoint = 7;
 
         // Trajectory.Points per Feature
         // The lower the number, the more Features we will have

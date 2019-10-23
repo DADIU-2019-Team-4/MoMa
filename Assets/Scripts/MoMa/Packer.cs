@@ -126,7 +126,7 @@ namespace MoMa
                 // That is because they are currently 0 and it is probably very close to the ones in the seconds Frames
                 lastLocalPosition = anim.frameList[Feature.FramesPerPoint].boneDataDict[bt].localPosition;
 
-                for (int i = 0; i < Feature.FramesPerPoint && i < anim.frameList.Count; i++)
+                for (int i = 0; (i < Feature.FramesPerPoint) && (i < anim.frameList.Count); i++)
                 {
                     anim.frameList[i].boneDataDict[bt].SetLocalVelocity(lastLocalPosition);
                 }

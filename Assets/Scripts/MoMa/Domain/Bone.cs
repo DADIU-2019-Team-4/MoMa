@@ -57,15 +57,6 @@ public class Bone
         public void SetLocalVelocity(Vector3 nextLocalPosition)
         {
             this.localVelocity = nextLocalPosition - this.localPosition;
-
-            if (this.localVelocity == Vector3.zero)
-            {
-                Debug.Log("LocalVelocity: 0");
-            }
-            else
-            {
-                Debug.Log("LocalVelocity: Non 0");
-            }
         }
     }
 }

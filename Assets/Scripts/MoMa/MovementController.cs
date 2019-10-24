@@ -7,10 +7,10 @@ namespace MoMa
 {
     public class MovementController : MonoBehaviour
     {
-        public const float DefaultDampTime = 4f;
-        public const float StopDampTime = 4f;
-        public const float Speed = 0.063f;
-        //public const float Speed = 0.6f;
+        public const float DefaultDampTime = 2f;
+        public const float StopDampTime = 2f;
+        public const float Speed = 7f;
+        public const float MaxSpeed = 8.5f;
         public const string ModelName = "Model";
 
         public int playerId = 0;
@@ -33,16 +33,18 @@ namespace MoMa
             // Get current input
             _direction.x = _player.GetAxisRaw("Move Horizontal");
             _direction.z = _player.GetAxisRaw("Move Vertical");
+            _direction.Normalize();
 
-            // Simulate stap (modifies the velocity)
-            SimulateStep(
+            Debug.Log("direction = " + _direction);
+
+            // Move to target position (modifies the velocity)
+            transform.position = Step(
                 transform.position,
                 _direction,
                 ref _velocity
                 );
 
-            // Move to target position
-            transform.position += _velocity * Speed;
+            Debug.Log("_velocity = " + _velocity + " magn: " + _velocity.magnitude);
 
             // Rotate to face the direction moving
             Vector2 direction = _velocity.GetXZVector2().normalized;
@@ -52,24 +54,27 @@ namespace MoMa
 
         public List<Vector3> GetFuture(int afterFrames)
         {
-            // Initialize the simulated position to the value of the current one
+            // Initialize the simulated position and velocity to the value of the current ones
             Vector3 simulatedPosition = new Vector3(
                 transform.position.x,
                 transform.position.y,
                 transform.position.z
                 );
-            Vector3 simulatedVelocity = new Vector3(_velocity.x, _velocity.y, _velocity.z);
+            Vector3 simulatedVelocity = new Vector3(
+                _velocity.x,
+                _velocity.y,
+                _velocity.z
+                );
             List<Vector3> future = new List<Vector3>();
 
             for (int i = 0; i < afterFrames; i++)
             {
                 // Calculate next position
-                SimulateStep(
+                simulatedPosition = Step(
                     simulatedPosition,
                     _direction,
                     ref simulatedVelocity
                     );
-                simulatedPosition += simulatedVelocity * Speed;
 
                 // Add it to the list
                 future.Add(
@@ -84,15 +89,16 @@ namespace MoMa
             return future;
         }
 
-        private void SimulateStep(Vector3 current, Vector3 inputVector, ref Vector3 currentVelocity)
+        private Vector3 Step(Vector3 current, Vector3 inputVector, ref Vector3 currentVelocity)
         {
-            Vector3.SmoothDamp(
+            return Vector3.SmoothDamp(
                 current,
-                current + inputVector,
+                current + inputVector * Speed,
                 ref currentVelocity,
                 inputVector == Vector3.zero ?
                     StopDampTime :
-                    DefaultDampTime
+                    DefaultDampTime,
+                MaxSpeed
                 );
         }
     }

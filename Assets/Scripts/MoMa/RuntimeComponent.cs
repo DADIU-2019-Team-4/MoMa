@@ -7,14 +7,16 @@ namespace MoMa
 {
     public class RuntimeComponent
     {
-        private const float RecalculationThreshold = 0.7f; // The maximum diff of two Trajectories before recalculating the Animation
+        private const float RecalculationThreshold = 0.25f; // The maximum diff of two Trajectories before recalculating the Animation
         private const int CooldownTime = 5; // Number of frames that a Frame is on cooldown after being played
         private const int CandidateFramesSize = 20; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
+        private const int ClipBlendFrames = 0; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
 
         private List<Animation> _anim = new List<Animation>();
         private List<Feature> _onCooldown = new List<Feature>();
         private int _currentAnimation = 0;
         private int _currentFeature = 0;
+        private Animation.Clip _currentClip;
 
         public RuntimeComponent()
         {
@@ -24,8 +26,14 @@ namespace MoMa
 
             this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("jog", "MoCapData", "jog3_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("circle_left", "MoCapData", "circle_left_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("circle_right", "MoCapData", "circle_right_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("acceleration", "MoCapData", "acceleration_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("run", "MoCapData", "Copy of run1_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("walk_continuous", "MoCapData", "walk_continuous2_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("circle_left", "MoCapData", "circle_left_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("circle_right", "MoCapData", "circle_right_DEFAULT_FIX"));
+
+            // Set ClipBlendFrames in AnimationClip
+            Animation.Clip.BlendFrames = ClipBlendFrames;
         }
 
         public Animation.Clip QueryClip(Trajectory.Snippet currentSnippet)
@@ -33,7 +41,7 @@ namespace MoMa
             // 1. Reduce cooldowns (after the previous Clip has finished)
             ReduceCooldowns();
 
-            // 2. Check if the next Clip is fitting (or the first one, if we reach the ennd)
+            // 2. Check if the next Clip is fitting (or the first one, if we reach the end)
             this._currentFeature = (this._currentFeature + 1) % this._anim[this._currentAnimation].featureList.Count;
 
             float diff = currentSnippet.CalcDiff(this._anim[this._currentAnimation].featureList[this._currentFeature].snippet);
@@ -48,13 +56,19 @@ namespace MoMa
                 Debug.Log("Not Recalculating");
             }
 
-            // 3. Construct the Clip and return it
-            return new Animation.Clip(
+            // 3. Construct the Clip, blend it with the current one and return it
+            Animation.Clip nextClip = new Animation.Clip(
                 this._anim[this._currentAnimation].frameList.GetRange(
                     this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum, 
-                    Feature.PointsPerFeature * Feature.FramesPerPoint
+                    Feature.PointsPerFeature * Feature.FramesPerPoint + Animation.Clip.BlendFrames
                     )
                 );
+
+            nextClip.BlendWith(_currentClip);
+            _currentClip = nextClip;
+
+            return nextClip;
+
         }
 
         private (int, int) QueryFeature(Trajectory.Snippet currentSnippet)

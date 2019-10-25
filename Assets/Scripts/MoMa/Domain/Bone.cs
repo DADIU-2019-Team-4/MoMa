@@ -58,5 +58,18 @@ public class Bone
         {
             this.localVelocity = nextLocalPosition - this.localPosition;
         }
+
+        public Data BlendWith(Data data, float weight)
+        {
+            this.position = this.position  * (1-weight) + data.position * weight;
+
+            // TODO: Not sure if weight here is used correcltly
+            this.rotation = Quaternion.Slerp(data.rotation, this.rotation, weight);
+
+            this.localPosition = this.localPosition * (1 - weight) + data.localPosition * weight;
+            this.localVelocity = this.localVelocity * (1 - weight) + data.localVelocity * weight;
+
+            return this;
+        }
     }
 }

@@ -39,7 +39,7 @@ namespace MoMa
                     frameNum,
 
                     // Compute the Trajectory Snippet relative to the current Frame
-                    trajectory.GetSnippet(
+                    trajectory.GetLocalSnippet(
                         pointNum,
                         this.frameList[frameNum].boneDataDict[Bone.Type.hips].position,
                         this.frameList[frameNum].boneDataDict[Bone.Type.hips].rotation
@@ -74,12 +74,9 @@ namespace MoMa
 
         public class Clip
         {
+            public static int BlendFrames = 0;
             private Frame[] _frames;
             private int _currentFrame = 0;
-
-            public Clip() {
-                this._frames = new Frame[0];
-            }
 
             public Clip(List<Frame> frameList)
             {
@@ -99,9 +96,25 @@ namespace MoMa
                     null;
             }
 
+            public Clip BlendWith(Clip clip)
+            {
+                if (clip != null && this._frames != null)
+                {
+                    for (int i = 0; i < BlendFrames && i < this._frames.Length; i++)
+                    {
+                        this._frames[i].BlendWith(
+                            clip._frames[clip._frames.Length - BlendFrames - 1 + i],
+                            (float)i / BlendFrames
+                            );
+                    }
+                }
+
+                return this;
+            }
+
             public bool isOver()
             {
-                return this._currentFrame == this._frames.Length;
+                return (this._currentFrame + BlendFrames >= this._frames.Length);
             }
         }
     }

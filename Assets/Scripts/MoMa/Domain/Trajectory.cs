@@ -9,7 +9,7 @@ namespace MoMa
     {
         public List<Point> points = new List<Point>();
 
-        public Snippet GetSnippet(
+        public Snippet GetLocalSnippet(
             int presentFrame,
             Vector3 presentPosition,
             Quaternion presentRotation)
@@ -49,6 +49,15 @@ namespace MoMa
         {
             public float x;
             public float z;
+            public float magnitude
+            {
+                get { return (float)Math.Sqrt(this.x * this.x + this.z * this.z); }
+            }
+
+            public static Point operator +(Point a, Point b)
+                => new Point(a.x + b.x, a.z + b.z);
+            public static Point operator -(Point a, Point b)
+                => new Point(a.x - b.x, a.z - b.z);
 
             public static Point getMedianPoint(List<Vector3> points)
             {
@@ -73,6 +82,12 @@ namespace MoMa
                 this.z = z;
             }
 
+            public Point(Vector2 v)
+            {
+                this.x = v.x;
+                this.z = v.y;
+            }
+
             public override string ToString()
             {
                 return "[" + this.x + ", " + this.z + "]";
@@ -82,7 +97,7 @@ namespace MoMa
         public class Snippet
         {
             public const int FuturePoints = 10;
-            public const int PastPoints = 4;
+            public const int PastPoints = 10;
 
             public Point[] points = new Point[PastPoints + FuturePoints];
 
@@ -90,23 +105,34 @@ namespace MoMa
             {
                 // In case any Snippet has null Points, the difference is infinite
                 float diff = 0f;
+                int totalWeight = 0;
 
-                // No weights
-                for (int i = 0; i < this.points.Length; i++)
-                    diff += (this.points[i]==null) || (candidate.points[i]==null) ?
-                        Mathf.Infinity :
-                        Mathf.Pow(
-                            (this.points[i].x - candidate.points[i].x) -
-                            (this.points[i].z - candidate.points[i].z)
-                            , 2);
+                // Diff of past Points
+                for (int i = 0; i < PastPoints; i++)
+                {
+                    int weight = 2^i;
+                    totalWeight += weight;
 
-                // Using weights
-                //float[] weights = new float[currentFeature.localTrajectory.points.Count];
-                //for (int i = 0; i < currentFeature.localTrajectory.points.Count; ++i)
-                //    diff += weights[i] * Mathf.Pow(currentFeature.localTrajectory.points[i].point.magnitude -
-                //        candidateFeature.localTrajectory.points[i].point.magnitude, 2);
+                    diff += (this.points[i] == null) ||
+                        (candidate.points[i] == null) ?
+                            Mathf.Infinity :
+                            (this.points[i] - candidate.points[i]).magnitude * weight;
+                }
 
-                return diff;
+                // Diff of future Points
+                for (int i = 0; i < FuturePoints; i++)
+                {
+                    int weight = 2^i;
+                    totalWeight += weight;
+
+                    diff +=
+                        (this.points[PastPoints + FuturePoints - 1 - i] == null) ||
+                        (candidate.points[PastPoints + FuturePoints - 1 - i] == null) ?
+                            Mathf.Infinity :
+                            (this.points[i] - candidate.points[i]).magnitude * weight;
+                }
+
+                return diff / totalWeight;
             }
         }
     }

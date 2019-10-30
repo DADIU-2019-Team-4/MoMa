@@ -7,43 +7,81 @@ namespace MoMa
     public class FollowerComponent
     {
         private const string PlayerTag = "Player"; // The Tag that the Player's GameObject has in the game
+        public const float DotScale = 0.03f;
+        public const float AlternativeDotScale = 0.03f;
+
+        public Color colorPath = Color.yellow;
+        public Color colorAlternativePath = Color.red;
 
         private Transform _model;
-        private List<GameObject> _dots = new List<GameObject>();
-
-        private GameObject CreateDot()
-        {
-            GameObject dot = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            dot.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-            return dot;
-        }
+        private GameObject _path;
+        private GameObject _altPaths;
+        private GameObject[] _altPathArray = new GameObject[RuntimeComponent.CandidateFramesSize];
 
         public FollowerComponent(Transform model)
         {
             this._model = model;
+            this._path = new GameObject();
+            this._altPaths = new GameObject();
+            this._altPaths.name = "Alternative Paths";
+
+            for (int i=0; i < RuntimeComponent.CandidateFramesSize; i++)
+            {
+                _altPathArray[i] = new GameObject();
+                _altPathArray[i].transform.parent = this._altPaths.transform;
+            }
         }
 
-        public void Draw(Trajectory.Snippet snippet)
+        public void DrawPath(Trajectory.Snippet snippet)
         {
-            foreach (GameObject dot in _dots)
-            {
-                GameObject.Destroy(dot);
-            }
-
-            _dots.Clear();
+            GameObject.Destroy(_path);
+            _path = new GameObject();
+            _path.name = "Path";
+            _path.transform.position = new Vector3(this._model.position.x, 0, this._model.position.z);
+            _path.transform.rotation = Quaternion.Euler(0, this._model.rotation.eulerAngles.y, 0);
 
             foreach (Trajectory.Point point in snippet.points)
             {
-                GameObject dot = CreateDot();
-                dot.transform.position = new Vector3(
-                    point.x + this._model.position.x,
-                    0,
-                    point.z + this._model.position.z
+                CreateDot(
+                    new Vector3(point.x, 0, point.z),
+                    DotScale,
+                    _path.transform
                     );
-                dot.transform.rotation = this._model.rotation;
-                _dots.Add(dot);
             }
+        }
+
+        public void DrawAlternativePath(Trajectory.Snippet snippet, int offset, float weight)
+        {
+            GameObject.Destroy(_altPathArray[offset]);
+            _altPathArray[offset] = new GameObject();
+            _altPathArray[offset].name = "Path " + offset;
+            _altPathArray[offset].transform.parent = _altPaths.transform;
+            _altPathArray[offset].transform.position = new Vector3(this._model.position.x, 0, this._model.position.z);
+            _altPathArray[offset].transform.rotation = Quaternion.Euler(0, this._model.rotation.eulerAngles.y, 0);
+
+            foreach (Trajectory.Point point in snippet.points)
+            {
+                CreateDot(
+                    new Vector3(point.x, 0, point.z),
+                    AlternativeDotScale,
+                    _altPathArray[offset].transform
+                    );
+            }
+        }
+
+        private GameObject CreateDot(Vector3 localPosition, float scale, Transform parent)
+        {
+            GameObject dot = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            dot.transform.parent = parent;
+            dot.transform.localPosition = localPosition;
+            dot.transform.localScale = new Vector3(scale, scale, scale);
+            MeshRenderer m = dot.GetComponent<MeshRenderer>();
+
+            m.material.color = scale == DotScale ?
+                colorPath :
+                colorAlternativePath;
+
+            return dot;
         }
     }
 }

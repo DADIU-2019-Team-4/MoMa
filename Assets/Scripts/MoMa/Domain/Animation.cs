@@ -19,20 +19,20 @@ namespace MoMa
             this.animationName = animationName;
         }
 
-        public void ComputeFeatures()
+        public void ComputeFeatures(int pointsPerFeature)
         {
             // 1. Find fitted trajectory for the whole animation
             Trajectory trajectory = ComputeFittedTrajectory();
 
             // 2. Compute Features
             for (
-                int pointNum = Trajectory.Snippet.PastPoints;   // Left padding for past Points
-                pointNum < trajectory.points.Count - Trajectory.Snippet.FuturePoints;   // Right padding for future Points
-                pointNum += Feature.PointsPerFeature   // Add 1 Feature every FeaturePeriod Points
+                int currentPoint = Trajectory.Snippet.PastPoints;   // Left padding for past Points
+                currentPoint < trajectory.points.Count - Trajectory.Snippet.FuturePoints;   // Right padding for future Points
+                currentPoint += pointsPerFeature
                 )
             {
                 // Find the first Frame of the current Point(s)
-                int frameNum = pointNum * Feature.FramesPerPoint;
+                int frameNum = currentPoint * Trajectory.FramesPerPoint;
 
                 // Built new Feature
                 this.featureList.Add( new Feature(
@@ -40,7 +40,7 @@ namespace MoMa
 
                     // Compute the Trajectory Snippet relative to the current Frame
                     trajectory.GetLocalSnippet(
-                        pointNum,
+                        currentPoint,
                         this.frameList[frameNum].boneDataDict[Bone.Type.hips].position,
                         this.frameList[frameNum].boneDataDict[Bone.Type.hips].rotation
                         ),
@@ -57,11 +57,11 @@ namespace MoMa
             Trajectory fittedTrajectory = new Trajectory();
 
             // Currently, it starts at the end of the median of the sample
-            for (int frameNum = 0; frameNum < this.frameList.Count - Feature.FramesPerPoint; frameNum += Feature.FramesPerPoint)
+            for (int frameNum = 0; frameNum < this.frameList.Count - Trajectory.FramesPerPoint; frameNum += Trajectory.FramesPerPoint)
             {
                 // Find the median Point of all the frames in the current sample
                 Trajectory.Point point = Trajectory.Point.getMedianPoint(
-                    this.frameList.GetRange(frameNum, Feature.FramesPerPoint).ConvertAll(
+                    this.frameList.GetRange(frameNum, Trajectory.FramesPerPoint).ConvertAll(
                         f => f.boneDataDict[Bone.Type.hips].position
                         )
                     );

@@ -7,6 +7,8 @@ namespace MoMa
 {
     public class Packer
     {
+        public const int PointsPerFeature = 2;
+
         public static Animation Pack(string animationName, string directory, string filename)
         {
             // Initialize an empty Animation
@@ -19,7 +21,7 @@ namespace MoMa
             ComputeLocalTranform(anim);
 
             // Compute the feature Frames
-            anim.ComputeFeatures();
+            anim.ComputeFeatures(PointsPerFeature);
 
             return anim;
         }
@@ -113,23 +115,18 @@ namespace MoMa
             foreach (Bone.Type bt in Enum.GetValues(typeof(Bone.Type)))
             {
                 // Find the position of the first frame
-                Vector3 lastLocalPosition;
+                Vector3 lastLocalPosition = anim.frameList[0].boneDataDict[bt].localPosition;
 
-                for (int i=Feature.FramesPerPoint; i < anim.frameList.Count; i++)
-                {
-                    // Local velocity 
-                    lastLocalPosition = anim.frameList[i - Feature.FramesPerPoint].boneDataDict[bt].localPosition;
-                    anim.frameList[i].boneDataDict[bt].SetLocalVelocity(lastLocalPosition);
-                }
-
-                // Set the velocity of the first Frames equal to the one in the seconds
-                // That is because they are currently 0 and it is probably very close to the ones in the seconds Frames
-                lastLocalPosition = anim.frameList[Feature.FramesPerPoint].boneDataDict[bt].localPosition;
-
-                for (int i = 0; (i < Feature.FramesPerPoint) && (i < anim.frameList.Count); i++)
+                // Compute the velocities of all the Frames but the first
+                for (int i=1; i < anim.frameList.Count; i++)
                 {
                     anim.frameList[i].boneDataDict[bt].SetLocalVelocity(lastLocalPosition);
+                    lastLocalPosition = anim.frameList[i].boneDataDict[bt].localPosition;
                 }
+
+                // Set the velocity of the first Frame equal to the one in the second
+                lastLocalPosition = anim.frameList[1].boneDataDict[bt].localPosition;
+                anim.frameList[0].boneDataDict[bt].SetLocalVelocity(lastLocalPosition);
             }
         }
     }

@@ -50,7 +50,7 @@ public class Bone
 
         public void SetLocalPosition(Vector3 originPosition, Quaternion originRotation)
         {
-            this.localPosition = Quaternion.Inverse(originRotation) * (this.position - originPosition);
+            this.localPosition = originRotation * (this.position - originPosition);
         }
 
         // The next position refers to the next Feature Frame NOT actual Frame
@@ -64,7 +64,7 @@ public class Bone
             this.position = this.position  * (1-weight) + data.position * weight;
 
             // TODO: Not sure if weight here is used correcltly
-            this.rotation = Quaternion.Slerp(data.rotation, this.rotation, weight);
+            //this.rotation = Quaternion.Slerp(data.rotation, this.rotation, weight);
 
             this.localPosition = this.localPosition * (1 - weight) + data.localPosition * weight;
             this.localVelocity = this.localVelocity * (1 - weight) + data.localVelocity * weight;

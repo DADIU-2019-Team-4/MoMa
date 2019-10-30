@@ -7,24 +7,22 @@ namespace MoMa
 {
     public class RuntimeComponent
     {
-        private const float RecalculationThreshold = 0.25f; // The maximum diff of two Trajectories before recalculating the Animation
-        private const int CooldownTime = 5; // Number of frames that a Frame is on cooldown after being played
-        private const int CandidateFramesSize = 20; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
-        private const int ClipBlendFrames = 0; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
+        public const float RecalculationThreshold = 0.4f; // The maximum diff of two Trajectories before recalculating the Animation
+        public const int CooldownTime = 0; // Number of frames that a Frame is on cooldown after being played
+        public const int CandidateFramesSize = 20; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
+        public const int ClipBlendFrames = 20; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
 
         private List<Animation> _anim = new List<Animation>();
         private List<Feature> _onCooldown = new List<Feature>();
         private int _currentAnimation = 0;
         private int _currentFeature = 0;
         private Animation.Clip _currentClip;
+        private FollowerComponent _fc;
 
-        public RuntimeComponent()
+        public RuntimeComponent(FollowerComponent fc)
         {
             // TODO: This should happen offline. Instead we only need to open its result
-            //this._anim = Packer.Pack("throwing", "MoCapData", "take-1_DEFAULT_C36", 5, 10, 10);
-            //this._anim = Packer.Pack("throwing", "MoCapData", "Sample project_scene-1_WalkSimple_DEFAULT_E46");
-
-            this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
+            //this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("jog", "MoCapData", "jog3_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("acceleration", "MoCapData", "acceleration_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("run", "MoCapData", "Copy of run1_DEFAULT_FIX"));
@@ -34,8 +32,11 @@ namespace MoMa
 
             // Set ClipBlendFrames in AnimationClip
             Animation.Clip.BlendFrames = ClipBlendFrames;
-        }
 
+            // TODO: This exists for dubugging. Maybe it needs to be removed.
+            this._fc = fc;
+        }
+        
         public Animation.Clip QueryClip(Trajectory.Snippet currentSnippet)
         {
             // 1. Reduce cooldowns (after the previous Clip has finished)
@@ -59,8 +60,8 @@ namespace MoMa
             // 3. Construct the Clip, blend it with the current one and return it
             Animation.Clip nextClip = new Animation.Clip(
                 this._anim[this._currentAnimation].frameList.GetRange(
-                    this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum, 
-                    Feature.PointsPerFeature * Feature.FramesPerPoint + Animation.Clip.BlendFrames
+                    this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum,
+                    Trajectory.Snippet.FuturePoints * Trajectory.FramesPerPoint + Animation.Clip.BlendFrames
                     )
                 );
 
@@ -78,6 +79,9 @@ namespace MoMa
             Tuple<float, Feature, int, int> winnerCandidate;
             Pose currentPose = this._anim[this._currentAnimation].featureList[this._currentFeature].pose;
             float minPoseDiff = 0f;
+
+            // TODO remove
+            this._fc.DrawPath(currentSnippet);
 
             // 1. Search each Animation
             for (int i=0; i < this._anim.Count; i++)
@@ -130,8 +134,9 @@ namespace MoMa
             winnerCandidate = bestCandidateFeature[0];
             minPoseDiff = currentPose.CalcDiff(winnerCandidate.Item2.pose);
 
-            foreach (Tuple<float, Feature, int, int> currentCandidate in bestCandidateFeature)
+            for (int i=0; i < bestCandidateFeature.Count; i++)
             {
+                Tuple<float, Feature, int, int> currentCandidate = bestCandidateFeature[i];
                 float currentPoseDiff = currentPose.CalcDiff(winnerCandidate.Item2.pose);
 
                 if (currentPoseDiff < minPoseDiff)
@@ -139,6 +144,8 @@ namespace MoMa
                     minPoseDiff = currentPoseDiff;
                     winnerCandidate = currentCandidate;
                 }
+
+                this._fc.DrawAlternativePath(currentCandidate.Item2.snippet, i, currentCandidate.Item1);
             }
 
             //Debug.Log("Starting animation: " + this._anim[winnerCandidate.Item3].animationName + " #" + winnerCandidate.Item4 + "/" + this._anim[this._currentAnimation].featureList.Count);

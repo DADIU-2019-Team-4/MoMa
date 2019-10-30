@@ -9,8 +9,8 @@ namespace MoMa
     public class MovementComponent
     {
         public const float DefaultDampTime = 2f;
-        public const float StopDampTime = 2f;
-        public const float Speed = 1.6f;
+        public const float StopDampTime = 3f;
+        public const float Speed = 3f;
         public const string ModelName = "Model";
 
         public int playerId = 0;

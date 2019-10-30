@@ -36,7 +36,6 @@ namespace MoMa
                 // This changes the rig to the one used by Rokoko
                 //this._bones[bone].SetPositionAndRotation(frame.boneDataDict[bone].position, frame.boneDataDict[bone].rotation);
                 //this._bones[bone].SetPositionAndRotation(frame.boneDataDict[bone].localPosition, frame.boneDataDict[bone].rotation);
-                //this._bones[bone].position = frame.boneDataDict[bone].localPosition;
 
                 // This keeps the rig's proportions
                 this._bones[bone].rotation = frame.boneDataDict[bone].rotation;

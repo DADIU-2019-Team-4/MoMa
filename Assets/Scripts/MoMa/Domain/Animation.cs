@@ -27,7 +27,7 @@ namespace MoMa
             // 2. Compute Features
             for (
                 int currentPoint = RuntimeComponent.FeaturePastPoints;   // Left padding for past Points
-                currentPoint < trajectory.points.Count - RuntimeComponent.FeaturePoints;   // Right padding for future Points
+                currentPoint < trajectory.points.Count - RuntimeComponent.FeaturePoints - RuntimeComponent.ClipBlendPoints;   // Right padding for future Points
                 currentPoint += RuntimeComponent.FeatureEveryPoints
                 )
             {
@@ -74,6 +74,7 @@ namespace MoMa
 
         public class Clip
         {
+            private const int BlendFrames = RuntimeComponent.ClipBlendPoints * RuntimeComponent.FramesPerPoint;
             private Frame[] _frames;
             private int _currentFrame = 0;
 
@@ -99,11 +100,11 @@ namespace MoMa
             {
                 if (clip != null && this._frames != null)
                 {
-                    for (int i = 0; i < RuntimeComponent.ClipBlendFrames && i < this._frames.Length; i++)
+                    for (int i = 0; i < BlendFrames && i < this._frames.Length; i++)
                     {
                         this._frames[i].BlendWith(
-                            clip._frames[clip._frames.Length - RuntimeComponent.ClipBlendFrames - 1 + i],
-                            (float)i / RuntimeComponent.ClipBlendFrames
+                            clip._frames[clip._frames.Length - BlendFrames - 1 + i],
+                            (float)i / BlendFrames
                             );
                     }
                 }
@@ -113,7 +114,7 @@ namespace MoMa
 
             public bool isOver()
             {
-                return (this._currentFrame + RuntimeComponent.ClipBlendFrames >= this._frames.Length);
+                return (this._currentFrame + BlendFrames >= this._frames.Length);
             }
         }
     }

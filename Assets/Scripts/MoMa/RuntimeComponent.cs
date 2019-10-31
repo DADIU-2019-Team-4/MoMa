@@ -8,14 +8,15 @@ namespace MoMa
     public class RuntimeComponent
     {
         // Fine-tuning
-        public const float RecalculationThreshold = 0.4f; // The maximum diff of two Trajectories before recalculating the Animation
+        public const float RecalculationThreshold = 0.0f; // The maximum diff of two Trajectories before recalculating the Animation
         //public const float RecalculationThreshold = Mathf.Infinity; // The maximum diff of two Trajectories before recalculating the Animation
         public const int CooldownTime = 500; // Number of frames that a Frame is on cooldown after being played
         public const int CandidateFramesSize = 50; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
-        public const int ClipBlendFrames = 100; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
+        public const int ClipBlendPoints = 5; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
 
         // Frame/Point/Feature ratios
         // FeaturePoints % FeatureEveryPoints should be 0
+        public const int SkipFrames = 3;  // Teke 1 Frame every SkipFrames in the Animation file
         public const int FeaturePoints = 10;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
         public const int FeaturePastPoints = 5;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
         public const int FeatureEveryPoints = 3;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
@@ -60,10 +61,10 @@ namespace MoMa
 
             if (diff > RecalculationThreshold)
             {
-                Debug.Log("Recalculating");
                 (this._currentAnimation, this._currentFeature) = QueryFeature(currentSnippet);
 
-                Debug.Log("File: " + this._currentAnimation + " Clip: " +  this._currentFeature);
+                //Debug.Log("Recalculating");
+                //Debug.Log("File: " + this._currentAnimation + " Clip: " +  this._currentFeature);
             }
             else
             {
@@ -74,7 +75,7 @@ namespace MoMa
             Animation.Clip nextClip = new Animation.Clip(
                 this._anim[this._currentAnimation].frameList.GetRange(
                     this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum,
-                    FramesPerPoint * FeaturePoints + ClipBlendFrames
+                    FramesPerPoint * (FeaturePoints + ClipBlendPoints)
                     )
                 );
 

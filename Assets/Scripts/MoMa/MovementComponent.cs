@@ -10,7 +10,7 @@ namespace MoMa
     {
         public const float DefaultDampTime = 1f;
         public const float StopDampTime = 3f;
-        public const float Speed = 2.4f;
+        public const float Speed = 1.4f;
         public const string ModelName = "Model";
 
         public int playerId = 0;

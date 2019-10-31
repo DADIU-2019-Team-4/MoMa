@@ -8,9 +8,9 @@ namespace MoMa
 {
     public class MovementComponent
     {
-        public const float DefaultDampTime = 2f;
+        public const float DefaultDampTime = 1f;
         public const float StopDampTime = 3f;
-        public const float Speed = 3f;
+        public const float Speed = 2.4f;
         public const string ModelName = "Model";
 
         public int playerId = 0;
@@ -83,10 +83,6 @@ namespace MoMa
                     StopDampTime :
                     DefaultDampTime
                 );
-
-            //currentVelocity.x = (float)Math.Round(currentVelocity.x, 3);
-            //currentVelocity.y = (float)Math.Round(currentVelocity.y, 3);
-            //currentVelocity.z = (float)Math.Round(currentVelocity.z, 3);
 
             return destination;
         }

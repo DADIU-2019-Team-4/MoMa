@@ -7,8 +7,6 @@ namespace MoMa
 {
     public class Packer
     {
-        public const int PointsPerFeature = 2;
-
         public static Animation Pack(string animationName, string directory, string filename)
         {
             // Initialize an empty Animation
@@ -21,7 +19,7 @@ namespace MoMa
             ComputeLocalTranform(anim);
 
             // Compute the feature Frames
-            anim.ComputeFeatures(PointsPerFeature);
+            anim.ComputeFeatures();
 
             return anim;
         }

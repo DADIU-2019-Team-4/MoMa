@@ -7,11 +7,6 @@ namespace MoMa
 {
     public class Trajectory
     {
-        // Animation.Frames per Trajectory.Point
-        // The lower the number, the denser the Trajectory points will be.
-        // That means closer approximation of the actual Trajectory and slower search for a Snippet
-        public const int FramesPerPoint = 4;
-
         public List<Point> points = new List<Point>();
 
         public Snippet GetLocalSnippet(
@@ -20,7 +15,7 @@ namespace MoMa
             Quaternion presentRotation)
         {
             // Validate input
-            if (presentFrame < Snippet.PastPoints-1 || presentFrame > points.Count - Snippet.FuturePoints)
+            if (presentFrame < RuntimeComponent.FeaturePastPoints - 1 || presentFrame > points.Count - RuntimeComponent.FeaturePoints)
             {
                 Debug.LogError("Attempt to create a Snippet the exceedes the past or the future limit");
                 throw new Exception("Attempt to create a Snippet the exceedes the past or the future limit");
@@ -29,11 +24,11 @@ namespace MoMa
             // Build the new Snippet
             Snippet snippet = new Snippet();
 
-            for (int i = 0; i < Snippet.Size; i++)
+            for (int i = 0; i < RuntimeComponent.SnippetSize; i++)
             {
                 // Compute the position of the points relative to the present position and rotation
                 // Create a Point at the current position
-                int addingFrame = presentFrame - Snippet.PastPoints + 1 + i;
+                int addingFrame = presentFrame - RuntimeComponent.FeaturePastPoints + 1 + i;
                 Vector3 destination = new Vector3(this.points[addingFrame].x, 0, this.points[addingFrame].z);
 
                 // Move it to the root
@@ -122,11 +117,7 @@ namespace MoMa
 
         public class Snippet
         {
-            public const int FuturePoints = 15;
-            public const int PastPoints = 10;
-            public const int Size = FuturePoints + PastPoints;
-
-            public Point[] points = new Point[Size];
+            public Point[] points = new Point[RuntimeComponent.SnippetSize];
 
             // Alternative, currently not in use
             public float CalcDiffExp(Snippet candidate)
@@ -136,7 +127,7 @@ namespace MoMa
                 int totalWeight = 0;
 
                 // Diff of past Points
-                for (int i = 0; i < PastPoints; i++)
+                for (int i = 0; i < RuntimeComponent.FeaturePastPoints; i++)
                 {
                     int weight = 2^i;
                     totalWeight += weight;
@@ -148,14 +139,14 @@ namespace MoMa
                 }
 
                 // Diff of future Points
-                for (int i = 0; i < FuturePoints; i++)
+                for (int i = 0; i < RuntimeComponent.FeaturePoints; i++)
                 {
                     int weight = 2^i;
                     totalWeight += weight;
 
                     diff +=
-                        (this.points[PastPoints + FuturePoints - 1 - i] == null) ||
-                        (candidate.points[PastPoints + FuturePoints - 1 - i] == null) ?
+                        (this.points[RuntimeComponent.SnippetSize - 1 - i] == null) ||
+                        (candidate.points[RuntimeComponent.SnippetSize - 1 - i] == null) ?
                             Mathf.Infinity :
                             (this.points[i] - candidate.points[i]).magnitude * weight;
                 }
@@ -169,7 +160,7 @@ namespace MoMa
                 float diff = 0f;
 
                 // Diff of past Points
-                for (int i = 0; i < Size; i++)
+                for (int i = 0; i < RuntimeComponent.SnippetSize; i++)
                 {
                     diff += (this.points[i] == null) ||
                         (candidate.points[i] == null) ?
@@ -186,22 +177,22 @@ namespace MoMa
                 string s = "Snippet: {";
 
                 // Print past Points
-                for (int i=0; i < PastPoints - 1; i++)
+                for (int i=0; i < RuntimeComponent.FeaturePastPoints - 1; i++)
                 {
                     s += this.points[i] + ", ";
                 }
 
                 // Print seperator
-                s += this.points[PastPoints - 1] + " || ";
+                s += this.points[RuntimeComponent.FeaturePastPoints - 1] + " || ";
 
                 // Print future Points
-                for (int i = PastPoints; i < Size - 1; i++)
+                for (int i = RuntimeComponent.FeaturePastPoints; i < RuntimeComponent.SnippetSize - 1; i++)
                 {
                     s += this.points[i] + ", ";
                 }
 
                 // Print end
-                s += this.points[Size - 1] + "}";
+                s += this.points[RuntimeComponent.SnippetSize - 1] + "}";
 
                 return s;
             }

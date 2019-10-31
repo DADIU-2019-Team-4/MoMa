@@ -19,20 +19,20 @@ namespace MoMa
             this.animationName = animationName;
         }
 
-        public void ComputeFeatures(int pointsPerFeature)
+        public void ComputeFeatures()
         {
             // 1. Find fitted trajectory for the whole animation
             Trajectory trajectory = ComputeFittedTrajectory();
 
             // 2. Compute Features
             for (
-                int currentPoint = Trajectory.Snippet.PastPoints;   // Left padding for past Points
-                currentPoint < trajectory.points.Count - Trajectory.Snippet.FuturePoints;   // Right padding for future Points
-                currentPoint += pointsPerFeature
+                int currentPoint = RuntimeComponent.FeaturePastPoints;   // Left padding for past Points
+                currentPoint < trajectory.points.Count - RuntimeComponent.FeaturePoints;   // Right padding for future Points
+                currentPoint += RuntimeComponent.FeatureEveryPoints
                 )
             {
                 // Find the first Frame of the current Point(s)
-                int frameNum = currentPoint * Trajectory.FramesPerPoint;
+                int frameNum = currentPoint * RuntimeComponent.FramesPerPoint;
 
                 // Built new Feature
                 this.featureList.Add( new Feature(
@@ -57,11 +57,11 @@ namespace MoMa
             Trajectory fittedTrajectory = new Trajectory();
 
             // Currently, it starts at the end of the median of the sample
-            for (int frameNum = 0; frameNum < this.frameList.Count - Trajectory.FramesPerPoint; frameNum += Trajectory.FramesPerPoint)
+            for (int frameNum = 0; frameNum < this.frameList.Count - RuntimeComponent.FramesPerPoint; frameNum += RuntimeComponent.FramesPerPoint)
             {
                 // Find the median Point of all the frames in the current sample
                 Trajectory.Point point = Trajectory.Point.getMedianPoint(
-                    this.frameList.GetRange(frameNum, Trajectory.FramesPerPoint).ConvertAll(
+                    this.frameList.GetRange(frameNum, RuntimeComponent.FramesPerPoint).ConvertAll(
                         f => f.boneDataDict[Bone.Type.hips].position
                         )
                     );
@@ -74,7 +74,6 @@ namespace MoMa
 
         public class Clip
         {
-            public static int BlendFrames = 0;
             private Frame[] _frames;
             private int _currentFrame = 0;
 
@@ -100,11 +99,11 @@ namespace MoMa
             {
                 if (clip != null && this._frames != null)
                 {
-                    for (int i = 0; i < BlendFrames && i < this._frames.Length; i++)
+                    for (int i = 0; i < RuntimeComponent.ClipBlendFrames && i < this._frames.Length; i++)
                     {
                         this._frames[i].BlendWith(
-                            clip._frames[clip._frames.Length - BlendFrames - 1 + i],
-                            (float)i / BlendFrames
+                            clip._frames[clip._frames.Length - RuntimeComponent.ClipBlendFrames - 1 + i],
+                            (float)i / RuntimeComponent.ClipBlendFrames
                             );
                     }
                 }
@@ -114,7 +113,7 @@ namespace MoMa
 
             public bool isOver()
             {
-                return (this._currentFrame + BlendFrames >= this._frames.Length);
+                return (this._currentFrame + RuntimeComponent.ClipBlendFrames >= this._frames.Length);
             }
         }
     }

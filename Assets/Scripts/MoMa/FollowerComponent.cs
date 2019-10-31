@@ -45,7 +45,8 @@ namespace MoMa
                 CreateDot(
                     new Vector3(point.x, 0, point.z),
                     DotScale,
-                    _path.transform
+                    _path.transform,
+                    Color.red
                     );
             }
         }
@@ -64,22 +65,20 @@ namespace MoMa
                 CreateDot(
                     new Vector3(point.x, 0, point.z),
                     AlternativeDotScale,
-                    _altPathArray[offset].transform
+                    _altPathArray[offset].transform,
+                    Color.green
                     );
             }
         }
 
-        private GameObject CreateDot(Vector3 localPosition, float scale, Transform parent)
+        private GameObject CreateDot(Vector3 localPosition, float scale, Transform parent, Color color)
         {
             GameObject dot = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             dot.transform.parent = parent;
             dot.transform.localPosition = localPosition;
             dot.transform.localScale = new Vector3(scale, scale, scale);
             MeshRenderer m = dot.GetComponent<MeshRenderer>();
-
-            m.material.color = scale == DotScale ?
-                colorPath :
-                colorAlternativePath;
+            m.material.color = color;
 
             return dot;
         }

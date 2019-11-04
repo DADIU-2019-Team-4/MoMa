@@ -28,7 +28,7 @@ namespace MoMa
             // Initialize Trajectory's past to the initial position
             for (int i = 0; i < RuntimeComponent.FeaturePastPoints; i++)
             {
-                this._trajectory.points.Add(new Trajectory.Point(0f, 0f));
+                this._trajectory.points.Add(new Trajectory.Point(new Vector2(0f, 0f)));
             }
         }
 
@@ -40,7 +40,7 @@ namespace MoMa
             // Add Point to Trajectory, removing the oldest point
             if (currentFrame % RuntimeComponent.FramesPerPoint == 0)
             {
-                this._trajectory.points.Add(new Trajectory.Point(this._model.position.x, this._model.position.z));
+                this._trajectory.points.Add(new Trajectory.Point(new Vector2(this._model.position.x, this._model.position.z)));
                 this._trajectory.points.RemoveAt(0);
 
                 // Reset current Frame

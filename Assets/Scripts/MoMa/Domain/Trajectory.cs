@@ -20,8 +20,8 @@ namespace MoMa
                 throw new Exception("Attempt to create a Snippet the exceedes the past or the future limit");
             }
 
-            // Fing present position
-            Vector3 presentPosition = new Vector3(this.points[presentFrame].x, 0, this.points[presentFrame].z);
+            // Find present position
+            Vector2 presentPosition = this.points[presentFrame].position;
 
             // Build the new Snippet
             Snippet snippet = new Snippet();
@@ -31,17 +31,17 @@ namespace MoMa
                 // Compute the position of the points relative to the present position and rotation
                 // Create a Point at the current position
                 int addingFrame = presentFrame - RuntimeComponent.FeaturePastPoints + 1 + i;
-                Vector3 destination = new Vector3(this.points[addingFrame].x, 0, this.points[addingFrame].z);
+                Vector3 destination3D = new Vector3(this.points[addingFrame].position.x, 0, this.points[addingFrame].position.y);
 
                 // Move it to the root
-                destination.x -= presentPosition.x;
-                destination.z -= presentPosition.z;
+                destination3D.x -= presentPosition.x;
+                destination3D.z -= presentPosition.y;
 
                 // Rotate it to face upwards
-                destination = Quaternion.Inverse(presentRotation) * destination;
+                destination3D = Quaternion.Inverse(presentRotation) * destination3D;
 
                 // Store the relative point to the snippet
-                snippet.points[i] = new Point(destination.x, destination.z);
+                snippet.points[i] = new Point(destination3D.GetXZVector2());
             }
 
             return snippet;
@@ -68,52 +68,43 @@ namespace MoMa
         {
             public const int Decimals = 4;
 
-            public float x;
-            public float z;
+            public Vector2 position;
 
             public float magnitude
             {
-                get { return (float)Math.Sqrt(this.x * this.x + this.z * this.z); }
+                get { return position.magnitude; }
             }
 
             public static Point operator +(Point a, Point b)
-                => new Point(a.x + b.x, a.z + b.z);
+                => new Point(a.position + b.position);
 
             public static Point operator -(Point a, Point b)
-                => new Point(a.x - b.x, a.z - b.z);
+                => new Point(a.position - b.position);
 
-            public static Point getMedianPoint(List<Vector3> points)
+            public static Point getMedianPoint(List<Vector2> points)
             {
-                Point point = new Point(0f, 0f);
+                Vector2 position = new Vector2(0f, 0f);
 
                 // Accumulate 
-                foreach (Vector3 currentPoint in points)
+                foreach (Vector2 currentPoint in points)
                 {
-                    point.x += currentPoint.x;
-                    point.z += currentPoint.z;
+                    position += currentPoint;
                 }
 
-                point.x /= points.Count;
-                point.z /= points.Count;
+                position /= points.Count;
 
-                return point;
-            }
-
-            public Point(float x, float z)
-            {
-                this.x = (float)Math.Round(x, Decimals);
-                this.z = (float)Math.Round(z, Decimals);
+                return new Point(position);
             }
 
             public Point(Vector2 v)
             {
-                this.x = (float)Math.Round(v.x, Decimals);
-                this.z = (float)Math.Round(v.y, Decimals);
+                this.position.x = (float)Math.Round(v.x, Decimals);
+                this.position.y = (float)Math.Round(v.y, Decimals);
             }
 
             public override string ToString()
             {
-                return "[" + this.x + ", " + this.z + "]";
+                return "[" + this.position.x + ", " + this.position.y + "]";
             }
         }
 

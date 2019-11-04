@@ -43,7 +43,7 @@ namespace MoMa
             foreach (Trajectory.Point point in snippet.points)
             {
                 CreateDot(
-                    new Vector3(point.x, 0, point.z),
+                    new Vector3(point.position.x, 0, point.position.y),
                     DotScale,
                     _path.transform,
                     Color.red
@@ -63,7 +63,7 @@ namespace MoMa
             foreach (Trajectory.Point point in snippet.points)
             {
                 CreateDot(
-                    new Vector3(point.x, 0, point.z),
+                    new Vector3(point.position.x, 0, point.position.y),
                     AlternativeDotScale,
                     _altPathArray[offset].transform,
                     Color.green

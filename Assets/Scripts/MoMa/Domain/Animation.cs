@@ -64,7 +64,7 @@ namespace MoMa
                 // Find the median Point of all the frames in the current sample
                 Trajectory.Point point = Trajectory.Point.getMedianPoint(
                     this.frameList.GetRange(frameNum - RuntimeComponent.FramesPerPoint / 2, RuntimeComponent.FramesPerPoint).ConvertAll(
-                        f => f.boneDataDict[Bone.Type.hips].position
+                        f => f.boneDataDict[Bone.Type.hips].position.GetXZVector2()
                         )
                     );
 

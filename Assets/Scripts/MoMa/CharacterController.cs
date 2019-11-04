@@ -87,7 +87,6 @@ namespace MoMa
             // Compute the Trajectory Snippet
             snippet = this._trajectory.GetLocalSnippet(
                 RuntimeComponent.FeaturePastPoints - 1,
-                this._model.position,
                 this._model.rotation
                 );
 

@@ -26,7 +26,7 @@ namespace MoMa
 
             // 2. Compute Features
             for (
-                int currentPoint = RuntimeComponent.FeaturePastPoints;   // Left padding for past Points
+                int currentPoint = RuntimeComponent.FeaturePastPoints-1;   // Left padding for past Points
                 currentPoint < trajectory.points.Count - RuntimeComponent.FeaturePoints - RuntimeComponent.ClipBlendPoints;   // Right padding for future Points
                 currentPoint += RuntimeComponent.FeatureEveryPoints
                 )
@@ -41,7 +41,6 @@ namespace MoMa
                     // Compute the Trajectory Snippet relative to the current Frame
                     trajectory.GetLocalSnippet(
                         currentPoint,
-                        this.frameList[frameNum].boneDataDict[Bone.Type.hips].position,
                         this.frameList[frameNum].boneDataDict[Bone.Type.hips].rotation
                         ),
 
@@ -56,12 +55,15 @@ namespace MoMa
         {
             Trajectory fittedTrajectory = new Trajectory();
 
-            // Currently, it starts at the end of the median of the sample
-            for (int frameNum = 0; frameNum < this.frameList.Count - RuntimeComponent.FramesPerPoint; frameNum += RuntimeComponent.FramesPerPoint)
+            for (
+                int frameNum = RuntimeComponent.FramesPerPoint / 2;
+                frameNum < this.frameList.Count - RuntimeComponent.FramesPerPoint;
+                frameNum += RuntimeComponent.FramesPerPoint
+                )
             {
                 // Find the median Point of all the frames in the current sample
                 Trajectory.Point point = Trajectory.Point.getMedianPoint(
-                    this.frameList.GetRange(frameNum, RuntimeComponent.FramesPerPoint).ConvertAll(
+                    this.frameList.GetRange(frameNum - RuntimeComponent.FramesPerPoint / 2, RuntimeComponent.FramesPerPoint).ConvertAll(
                         f => f.boneDataDict[Bone.Type.hips].position
                         )
                     );

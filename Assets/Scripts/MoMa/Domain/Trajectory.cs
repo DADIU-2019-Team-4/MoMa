@@ -11,7 +11,6 @@ namespace MoMa
 
         public Snippet GetLocalSnippet(
             int presentFrame,
-            Vector3 presentPosition,
             Quaternion presentRotation)
         {
             // Validate input
@@ -20,6 +19,9 @@ namespace MoMa
                 Debug.LogError("Attempt to create a Snippet the exceedes the past or the future limit");
                 throw new Exception("Attempt to create a Snippet the exceedes the past or the future limit");
             }
+
+            // Fing present position
+            Vector3 presentPosition = new Vector3(this.points[presentFrame].x, 0, this.points[presentFrame].z);
 
             // Build the new Snippet
             Snippet snippet = new Snippet();

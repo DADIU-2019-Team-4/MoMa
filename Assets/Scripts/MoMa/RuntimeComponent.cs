@@ -11,15 +11,15 @@ namespace MoMa
         public const float RecalculationThreshold = 0.0f; // The maximum diff of two Trajectories before recalculating the Animation
         //public const float RecalculationThreshold = Mathf.Infinity; // The maximum diff of two Trajectories before recalculating the Animation
         public const int CooldownTime = 500; // Number of frames that a Frame is on cooldown after being played
-        public const int CandidateFramesSize = 50; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
+        public const int CandidateFramesSize = 20; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
         public const int ClipBlendPoints = 5; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
 
         // Frame/Point/Feature ratios
         // FeaturePoints % FeatureEveryPoints should be 0
         public const int SkipFrames = 3;  // Teke 1 Frame every SkipFrames in the Animation file
-        public const int FeaturePoints = 10;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
-        public const int FeaturePastPoints = 5;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
-        public const int FeatureEveryPoints = 3;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
+        public const int FeaturePoints = 1;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
+        public const int FeaturePastPoints = 2;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
+        public const int FeatureEveryPoints = 1;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
         public const int FramesPerPoint = 5;    // Animation.Frames per Trajectory.Point. The lower the number, the denser the Trajectory points will be.
 
         public const int FramesPerFeature = FramesPerPoint * FeaturePoints;  // Animation.Frames per Feature
@@ -36,13 +36,13 @@ namespace MoMa
         public RuntimeComponent(FollowerComponent fc)
         {
             // TODO: This should happen offline. Instead we only need to open its result
-            //this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("jog", "MoCapData", "jog3_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("acceleration", "MoCapData", "acceleration_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("run", "MoCapData", "Copy of run1_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("walk_continuous", "MoCapData", "walk_continuous2_DEFAULT_FIX"));
-            this._anim.Add(Packer.Pack("circle_left", "MoCapData", "circle_left_DEFAULT_FIX"));
-            this._anim.Add(Packer.Pack("circle_right", "MoCapData", "circle_right_DEFAULT_FIX"));
+            //this._anim.Add(Packer.Pack("circle_left", "MoCapData", "circle_left_DEFAULT_FIX"));
+            //this._anim.Add(Packer.Pack("circle_right", "MoCapData", "circle_right_DEFAULT_FIX"));
 
             // TODO: This exists for dubugging. Maybe it needs to be removed.
             this._fc = fc;

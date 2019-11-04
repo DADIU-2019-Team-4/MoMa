@@ -10,7 +10,8 @@ namespace MoMa
     {
         public const float DefaultDampTime = 1f;
         public const float StopDampTime = 3f;
-        public const float Speed = 1.4f;
+        public const float WalkingSpeed = 0.8f;
+        public const float RunningSpeed = 1.4f;
         public const string ModelName = "Model";
 
         public int playerId = 0;
@@ -19,6 +20,7 @@ namespace MoMa
         [SerializeField]
         private Vector3 _velocity = new Vector3();
         private Vector3 _direction = new Vector3(1, 0, 0);
+        private float _speed;
         private Player _player;
         private Transform _model;
 
@@ -36,6 +38,10 @@ namespace MoMa
             _direction.x = _player.GetAxisRaw("Move Horizontal");
             _direction.z = _player.GetAxisRaw("Move Vertical");
             _direction.Normalize();
+
+            this._speed = Input.GetKey(KeyCode.Space) ?
+                RunningSpeed :
+                WalkingSpeed;
 
             // Move to target position (modifies the velocity)
             _transform.position = Step(
@@ -77,7 +83,7 @@ namespace MoMa
         {
             Vector3 destination = Vector3.SmoothDamp(
                 current,
-                current + inputVector * Speed,
+                current + inputVector * _speed,
                 ref currentVelocity,
                 inputVector == Vector3.zero ?
                     StopDampTime :

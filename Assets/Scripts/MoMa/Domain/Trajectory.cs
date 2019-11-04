@@ -10,8 +10,7 @@ namespace MoMa
         public List<Point> points = new List<Point>();
 
         public Snippet GetLocalSnippet(
-            int presentFrame,
-            Quaternion presentRotation)
+            int presentFrame)
         {
             // Validate input
             if (presentFrame < RuntimeComponent.FeaturePastPoints - 1 || presentFrame > points.Count - RuntimeComponent.FeaturePoints)
@@ -20,8 +19,9 @@ namespace MoMa
                 throw new Exception("Attempt to create a Snippet the exceedes the past or the future limit");
             }
 
-            // Find present position
+            // Find present position and rotation
             Vector2 presentPosition = this.points[presentFrame].position;
+            Quaternion presentRotation = this.points[presentFrame].rotation;
 
             // Build the new Snippet
             Snippet snippet = new Snippet();
@@ -31,17 +31,20 @@ namespace MoMa
                 // Compute the position of the points relative to the present position and rotation
                 // Create a Point at the current position
                 int addingFrame = presentFrame - RuntimeComponent.FeaturePastPoints + 1 + i;
-                Vector3 destination3D = new Vector3(this.points[addingFrame].position.x, 0, this.points[addingFrame].position.y);
+                Vector3 localPosition3D = new Vector3(this.points[addingFrame].position.x, 0, this.points[addingFrame].position.y);
 
                 // Move it to the root
-                destination3D.x -= presentPosition.x;
-                destination3D.z -= presentPosition.y;
+                localPosition3D.x -= presentPosition.x;
+                localPosition3D.z -= presentPosition.y;
 
                 // Rotate it to face upwards
-                destination3D = Quaternion.Inverse(presentRotation) * destination3D;
+                localPosition3D = Quaternion.Inverse(presentRotation) * localPosition3D;
+
+                // Compute the new rotation
+                Quaternion localRotation = this.points[addingFrame].rotation * presentRotation;
 
                 // Store the relative point to the snippet
-                snippet.points[i] = new Point(destination3D.GetXZVector2());
+                snippet.points[i] = new Point(localPosition3D.GetXZVector2(), localRotation);
             }
 
             return snippet;
@@ -69,42 +72,46 @@ namespace MoMa
             public const int Decimals = 4;
 
             public Vector2 position;
+            public Quaternion rotation;
 
             public float magnitude
             {
                 get { return position.magnitude; }
             }
 
-            public static Point operator +(Point a, Point b)
-                => new Point(a.position + b.position);
+            public static float operator -(Point a, Point b)
+                // TODO include rotation
+                => (a.position - b.position).magnitude;
 
-            public static Point operator -(Point a, Point b)
-                => new Point(a.position - b.position);
-
-            public static Point getMedianPoint(List<Vector2> points)
+            public static Point getMedianPoint(List<(Vector2, Vector3)> transform)
             {
                 Vector2 position = new Vector2(0f, 0f);
+                Vector3 rotation = new Vector3(0f, 0f, 0f);
 
-                // Accumulate 
-                foreach (Vector2 currentPoint in points)
+                // Accumulate
+                foreach ( (Vector2 currentPosition, Vector3 currentRotation) in transform)
                 {
-                    position += currentPoint;
+                    position += currentPosition;
+                    rotation += currentRotation;
                 }
 
-                position /= points.Count;
+                // Divide
+                position /= transform.Count;
+                rotation /= transform.Count;
 
-                return new Point(position);
+                return new Point(position, Quaternion.Euler(rotation));
             }
 
-            public Point(Vector2 v)
+            public Point(Vector2 v, Quaternion rotation)
             {
                 this.position.x = (float)Math.Round(v.x, Decimals);
                 this.position.y = (float)Math.Round(v.y, Decimals);
+                this.rotation = rotation;
             }
 
             public override string ToString()
             {
-                return "[" + this.position.x + ", " + this.position.y + "]";
+                return " pos: [" + this.position.x + ", " + this.position.y + "], rot: " + this.rotation.eulerAngles;
             }
         }
 
@@ -128,7 +135,7 @@ namespace MoMa
                     diff += (this.points[i] == null) ||
                         (candidate.points[i] == null) ?
                             Mathf.Infinity :
-                            (this.points[i] - candidate.points[i]).magnitude * weight;
+                            (this.points[i] - candidate.points[i]) * weight;
                 }
 
                 // Diff of future Points
@@ -141,7 +148,7 @@ namespace MoMa
                         (this.points[RuntimeComponent.SnippetSize - 1 - i] == null) ||
                         (candidate.points[RuntimeComponent.SnippetSize - 1 - i] == null) ?
                             Mathf.Infinity :
-                            (this.points[i] - candidate.points[i]).magnitude * weight;
+                            (this.points[i] - candidate.points[i]) * weight;
                 }
 
                 return diff / totalWeight;
@@ -158,7 +165,7 @@ namespace MoMa
                     diff += (this.points[i] == null) ||
                         (candidate.points[i] == null) ?
                             Mathf.Infinity :
-                            (this.points[i] - candidate.points[i]).magnitude;
+                            (this.points[i] - candidate.points[i]);
                 }
 
                 return diff;

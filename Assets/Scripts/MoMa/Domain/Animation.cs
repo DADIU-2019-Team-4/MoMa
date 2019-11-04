@@ -39,10 +39,7 @@ namespace MoMa
                     frameNum,
 
                     // Compute the Trajectory Snippet relative to the current Frame
-                    trajectory.GetLocalSnippet(
-                        currentPoint,
-                        this.frameList[frameNum].boneDataDict[Bone.Type.hips].rotation
-                        ),
+                    trajectory.GetLocalSnippet(currentPoint),
 
                     // Compute the Pose according to the current Frame
                     new Pose(this.frameList[frameNum])
@@ -64,7 +61,7 @@ namespace MoMa
                 // Find the median Point of all the frames in the current sample
                 Trajectory.Point point = Trajectory.Point.getMedianPoint(
                     this.frameList.GetRange(frameNum - RuntimeComponent.FramesPerPoint / 2, RuntimeComponent.FramesPerPoint).ConvertAll(
-                        f => f.boneDataDict[Bone.Type.hips].position.GetXZVector2()
+                        f => (f.boneDataDict[Bone.Type.hips].position.GetXZVector2(), f.boneDataDict[Bone.Type.hips].rotation.eulerAngles)
                         )
                     );
 

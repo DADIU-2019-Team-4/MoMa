@@ -28,7 +28,7 @@ namespace MoMa
             // Initialize Trajectory's past to the initial position
             for (int i = 0; i < RuntimeComponent.FeaturePastPoints; i++)
             {
-                this._trajectory.points.Add(new Trajectory.Point(new Vector2(0f, 0f)));
+                this._trajectory.points.Add(new Trajectory.Point(new Vector2(0f, 0f), Quaternion.identity));
             }
         }
 
@@ -40,7 +40,12 @@ namespace MoMa
             // Add Point to Trajectory, removing the oldest point
             if (currentFrame % RuntimeComponent.FramesPerPoint == 0)
             {
-                this._trajectory.points.Add(new Trajectory.Point(new Vector2(this._model.position.x, this._model.position.z)));
+                this._trajectory.points.Add(
+                    new Trajectory.Point(
+                        new Vector2(this._model.position.x, this._model.position.z),
+                        this._model.rotation
+                        )
+                    );
                 this._trajectory.points.RemoveAt(0);
 
                 // Reset current Frame
@@ -73,22 +78,22 @@ namespace MoMa
             int futureFramesNumber = RuntimeComponent.FramesPerPoint * RuntimeComponent.FeaturePoints;
 
             // Get simulated future
-            List<Vector3> futureFrames = this._mc.GetFuture(futureFramesNumber);
+            List<(Vector3, Quaternion)> futureTransforms = this._mc.GetFuture(futureFramesNumber);
 
             // Convert the (many) Frames to (few) Point and add them to the Trajectory
             for (int i = 0; i < RuntimeComponent.FeaturePoints; i++)
             {
                 //Trajectory.Point point = Trajectory.Point.getMedianPoint(futureFrames.GetRange(i * Trajectory.FramesPerPoint, Trajectory.FramesPerPoint));
                 //Trajectory.Point point = new Trajectory.Point(futureFrames[i * Feature.FramesPerPoint + Feature.FramesPerPoint / 2].GetXZVector2());
-                Trajectory.Point point = new Trajectory.Point(futureFrames[ (i+1) * RuntimeComponent.FramesPerPoint - 1].GetXZVector2());
+                Trajectory.Point point = new Trajectory.Point(
+                    futureTransforms[(i + 1) * RuntimeComponent.FramesPerPoint - 1].Item1.GetXZVector2(),
+                    futureTransforms[(i + 1) * RuntimeComponent.FramesPerPoint - 1].Item2
+                    );
                 this._trajectory.points.Add(point);
             }
 
             // Compute the Trajectory Snippet
-            snippet = this._trajectory.GetLocalSnippet(
-                RuntimeComponent.FeaturePastPoints - 1,
-                this._model.rotation
-                );
+            snippet = this._trajectory.GetLocalSnippet(RuntimeComponent.FeaturePastPoints - 1);
 
             // Remove future Points from Trajectory
             this._trajectory.points.RemoveRange(RuntimeComponent.FeaturePastPoints, RuntimeComponent.FeaturePoints);

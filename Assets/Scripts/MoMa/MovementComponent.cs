@@ -56,12 +56,12 @@ namespace MoMa
             _model.eulerAngles = new Vector3(0, -rotationAngle, 0);
         }
 
-        public List<Vector3> GetFuture(int afterFrames)
+        public List<(Vector3, Quaternion)> GetFuture(int afterFrames)
         {
             // Initialize the simulated position and velocity to the value of the current ones
             Vector3 simulatedPosition = _transform.position;
             Vector3 simulatedVelocity = _velocity;
-            List<Vector3> future = new List<Vector3>();
+            List<(Vector3, Quaternion)> future = new List<(Vector3, Quaternion)>();
 
             for (int i = 0; i < afterFrames; i++)
             {
@@ -73,7 +73,7 @@ namespace MoMa
                     );
 
                 // Add it to the list
-                future.Add(simulatedPosition);
+                future.Add((simulatedPosition, Quaternion.Euler(simulatedVelocity.normalized)));
             }
 
             return future;

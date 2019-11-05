@@ -11,7 +11,7 @@ namespace MoMa
         public const float DefaultDampTime = 1f;
         public const float StopDampTime = 3f;
         public const float WalkingSpeed = 0.5f;
-        public const float RunningSpeed = 0.9f;
+        public const float RunningSpeed = 1.0f;
         public const string ModelName = "Model";
 
         public int playerId = 0;

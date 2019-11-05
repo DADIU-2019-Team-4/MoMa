@@ -17,19 +17,20 @@ namespace MoMa
             }
         }
 
-        public float CalcDiff(Pose candidate)
+        public (float, float) CalcDiff(Pose candidate)
         {
-            float diff = 0f;
+            float diff1 = 0f;
+            float diff2 = 0f;
 
             foreach (Bone.Type bone in limbDataDict.Keys)
             {
                 Vector3 expectedLocalPosition = this.limbDataDict[bone].localPosition + this.limbDataDict[bone].localVelocity;
                 Vector3 candidateLocalPosition = candidate.limbDataDict[bone].localPosition;
-                diff += (expectedLocalPosition - candidateLocalPosition).magnitude;
-                diff += (this.limbDataDict[bone].localVelocity - candidate.limbDataDict[bone].localVelocity).magnitude;
+                diff1 += (expectedLocalPosition - candidateLocalPosition).magnitude;
+                diff2 += (this.limbDataDict[bone].localVelocity - candidate.limbDataDict[bone].localVelocity).magnitude;
             }
 
-            return diff;
+            return (diff1, diff2);
         }
 
         public class Limb

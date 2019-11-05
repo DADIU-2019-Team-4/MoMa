@@ -64,7 +64,7 @@ public class Bone
             this.position = this.position  * (1-weight) + data.position * weight;
 
             // TODO: Not sure if weight here is used correcltly
-            //this.rotation = Quaternion.Slerp(data.rotation, this.rotation, weight);
+            this.rotation = Quaternion.Slerp(data.rotation, this.rotation, weight);
 
             this.localPosition = this.localPosition * (1 - weight) + data.localPosition * weight;
             this.localVelocity = this.localVelocity * (1 - weight) + data.localVelocity * weight;

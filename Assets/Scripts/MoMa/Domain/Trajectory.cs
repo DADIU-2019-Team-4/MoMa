@@ -80,7 +80,7 @@ namespace MoMa
             }
 
             public static float operator -(Point a, Point b)
-                // TODO include rotation
+                // TODO include rotation?
                 => (a.position - b.position).magnitude;
 
             public static Point getMedianPoint(List<(Vector2, Vector3)> transform)

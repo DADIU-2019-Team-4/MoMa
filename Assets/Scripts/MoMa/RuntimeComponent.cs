@@ -8,20 +8,20 @@ namespace MoMa
     public class RuntimeComponent
     {
         // Fine-tuning
-        public const float RecalculationThreshold = 0.0f; // The maximum diff of two Trajectories before recalculating the Animation
+        public const float RecalculationThreshold = 0.2f; // The maximum diff of two Trajectories before recalculating the Animation
         //public const float RecalculationThreshold = Mathf.Infinity; // The maximum diff of two Trajectories before recalculating the Animation
         public const int CooldownTime = 0; // Number of frames that a Frame is on cooldown after being played
-        public const int CandidateFramesSize = 20; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
-        public const int ClipBlendPoints = 5; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
+        public const int CandidateFramesSize = 50; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
+        public const int ClipBlendPoints = 0; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
 
         // Frame/Point/Feature ratios
         // FeaturePoints % FeatureEveryPoints should be 0
-        public const int SkipFrames = 3;  // Teke 1 Frame every SkipFrames in the Animation file
-        public const int FeaturePoints = 2;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
+        public const int SkipFrames = 3;  // Take 1 Frame every SkipFrames in the Animation file
+        public const int FeaturePoints = 3;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
         public const int FeaturePastPoints = 2;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
-        public const int FeatureEveryPoints = 1;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
+        public const int FeatureEveryPoints = 2;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
         // FramesPerPoint % 2 should be 0
-        public const int FramesPerPoint = 6;    // Animation.Frames per Trajectory.Point. The lower the number, the denser the Trajectory points will be.
+        public const int FramesPerPoint = 4;    // Animation.Frames per Trajectory.Point. The lower the number, the denser the Trajectory points will be.
 
         public const int FramesPerFeature = FramesPerPoint * FeaturePoints;  // Animation.Frames per Feature
         public const int FeatureStep = FeaturePoints / FeatureEveryPoints;  // Features overlap generally. This is the distance between two matching Features.
@@ -38,12 +38,12 @@ namespace MoMa
         {
             // TODO: This should happen offline. Instead we only need to open its result
             //this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("jog", "MoCapData", "jog3_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("acceleration", "MoCapData", "acceleration_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("run", "MoCapData", "Copy of run1_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("jog", "MoCapData", "jog3_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("acceleration", "MoCapData", "acceleration_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("run", "MoCapData", "Copy of run1_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("walk_continuous", "MoCapData", "walk_continuous2_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("circle_left", "MoCapData", "circle_left_DEFAULT_FIX"));
-            //this._anim.Add(Packer.Pack("circle_right", "MoCapData", "circle_right_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("circle_left", "MoCapData", "circle_left_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("circle_right", "MoCapData", "circle_right_DEFAULT_FIX"));
 
             // TODO: This exists for dubugging. Maybe it needs to be removed.
             this._fc = fc;
@@ -92,85 +92,90 @@ namespace MoMa
 
         private (int, int) QueryFeature(Trajectory.Snippet currentSnippet)
         {
-            // TODO: Instead of searching a list every time, implement some kind of SortedList
-            List<Tuple<float, Feature, int, int>> bestCandidateFeature = new List<Tuple<float, Feature, int, int>>();
-            Tuple<float, Feature, int, int> winnerCandidate;
+            List<CandidateFeature> candidateFeatures = new List<CandidateFeature>();
+            Tuple<float, CandidateFeature> winnerFeature = new Tuple<float, CandidateFeature>(Mathf.Infinity, null);
             Pose currentPose = this._anim[this._currentAnimation].featureList[this._currentFeature].pose;
-            float minPoseDiff = 0f;
+            float maxPosePositionDiff = 0;
+            float maxPoseVelocityDiff = 0;
 
             // TODO remove
             this._fc.DrawPath(currentSnippet);
 
-            // 1. Search each Animation
+            // 1. Find the Clips with the most fitting Trajectories
             for (int i=0; i < this._anim.Count; i++)
             {
-                Animation anim = this._anim[i];
-
-                // 2. Search Feature list for candidate Frames (comparing Trajectories)
-                for (int j = 0; j < anim.featureList.Count; j++)
+                for (int j = 0; j < this._anim[i].featureList.Count; j++)
                 {
-                    Feature candidateFeature = anim.featureList[j];
+                    Feature feature = this._anim[i].featureList[j];
 
                     // Consider only active Frames (not on cooldown)
-                    if (candidateFeature.cooldownTimer == 0)
+                    if (feature.cooldownTimer == 0)
                     {
-                        // A. Find diff to current 
-                        float diff = currentSnippet.CalcDiff(candidateFeature.snippet);
+                        // A. Add candidate Feature to the best candidates list
+                        CandidateFeature candidateFeature = new CandidateFeature(
+                            feature, currentSnippet.CalcDiff(feature.snippet), i, j
+                            );
+                        candidateFeatures.Add(candidateFeature);
 
-                        // B. Add candidate Feature to the best candidates list
-                        bestCandidateFeature.Add(Tuple.Create(diff, candidateFeature, i, j));
-
-                        // C. Sort candidates based on their diff
-                        bestCandidateFeature.Sort(
+                        // B. Sort candidates based on their diff
+                        candidateFeatures.Sort(
                             (firstObj, secondObj) =>
                             {
-                                return firstObj.Item1.CompareTo(secondObj.Item1);
+                                return firstObj.trajectoryDiff.CompareTo(secondObj.trajectoryDiff);
                             }
                         );
 
-                        // D. Keep only a predefined number of best candidates
-                        if (bestCandidateFeature.Count <= 0)
+                        // C. Keep only a predefined number of best candidates
+                        if (candidateFeatures.Count <= 0)
                         {
                             Debug.LogError("Unable to find any Animation Frame to transition to");
                             return (0, 0);
                         }
-                        else if (bestCandidateFeature.Count > CandidateFramesSize)
+                        else if (candidateFeatures.Count > CandidateFramesSize)
                         {
-                            bestCandidateFeature.RemoveRange(CandidateFramesSize, bestCandidateFeature.Count - CandidateFramesSize);
+                            candidateFeatures.RemoveRange(CandidateFramesSize, candidateFeatures.Count - CandidateFramesSize);
                         }
                     }
                 }
             }
 
-            // 3. Search candidate Frames for the one with the most fitting pose
-            if (bestCandidateFeature.Count <= 0)
+            // 2. Compute the difference in Pose for each Clip (position and velocity)
+            for (int i = 0; i < candidateFeatures.Count; i++)
             {
-                Debug.LogError("Unable to find any Frame to transition to");
-                throw new Exception("Unable to find any Frame to transition to");
+                (float posePositionDiff, float poseVelocityDiff) = currentPose.CalcDiff(candidateFeatures[i].feature.pose);
+                candidateFeatures[i].posePositionDiff = posePositionDiff;
+                candidateFeatures[i].poseVelocityDiff = poseVelocityDiff;
+
+                // Keep the maximum values of the differences, in order to normalise
+                maxPosePositionDiff = posePositionDiff > maxPosePositionDiff ?
+                     posePositionDiff :
+                     maxPosePositionDiff;
+
+                maxPoseVelocityDiff = poseVelocityDiff > maxPoseVelocityDiff ?
+                    poseVelocityDiff :
+                    maxPoseVelocityDiff;
+
+                // TODO remove
+                this._fc.DrawAlternativePath(candidateFeatures[i].feature.snippet, i, candidateFeatures[i].trajectoryDiff);
             }
 
-            winnerCandidate = bestCandidateFeature[0];
-            minPoseDiff = currentPose.CalcDiff(winnerCandidate.Item2.pose);
-
-            for (int i=0; i < bestCandidateFeature.Count; i++)
+            // 3. Normalize and add differences
+            for (int i=0; i < candidateFeatures.Count; i++)
             {
-                Tuple<float, Feature, int, int> currentCandidate = bestCandidateFeature[i];
-                float currentPoseDiff = currentPose.CalcDiff(winnerCandidate.Item2.pose);
+                candidateFeatures[i].posePositionDiff /= maxPosePositionDiff;
+                candidateFeatures[i].poseVelocityDiff /= maxPoseVelocityDiff;
 
-                if (currentPoseDiff < minPoseDiff)
-                {
-                    minPoseDiff = currentPoseDiff;
-                    winnerCandidate = currentCandidate;
-                }
+                float totalPostDiff = candidateFeatures[i].posePositionDiff + candidateFeatures[i].poseVelocityDiff;
 
-                this._fc.DrawAlternativePath(currentCandidate.Item2.snippet, i, currentCandidate.Item1);
+                winnerFeature = winnerFeature.Item1 > totalPostDiff ?
+                    new Tuple<float, CandidateFeature>(totalPostDiff, candidateFeatures[i]) :
+                    winnerFeature;
             }
 
-            //Debug.Log("Starting animation: " + this._anim[winnerCandidate.Item3].animationName + " #" + winnerCandidate.Item4 + "/" + this._anim[this._currentAnimation].featureList.Count);
-            Debug.Log("Starting animation: " + this._anim[winnerCandidate.Item3].animationName);
+            Debug.Log("Starting animation: " + this._anim[winnerFeature.Item2.animationNum].animationName);
 
             // 4. Return the Feature's index
-            return (winnerCandidate.Item3, winnerCandidate.Item4);
+            return (winnerFeature.Item2.animationNum, winnerFeature.Item2.clipNum);
         }
 
         private void PutOnCooldown(Feature feature)
@@ -197,6 +202,26 @@ namespace MoMa
                     _onCooldown.Remove(feature);
                 }
             }
+        }
+
+        private class CandidateFeature
+        {
+            public Feature feature;
+            public float trajectoryDiff;
+            public float posePositionDiff;
+            public float poseVelocityDiff;
+            public int animationNum;
+            public int clipNum;
+
+            public CandidateFeature(Feature feature, float trajectoryDiff, int animationNum, int clipNum)
+            {
+                this.feature = feature;
+                this.trajectoryDiff = trajectoryDiff;
+                this.animationNum = animationNum;
+                this.clipNum = clipNum;
+                this.posePositionDiff = Mathf.Infinity;
+                this.poseVelocityDiff = Mathf.Infinity;
+        }
         }
     }
 }

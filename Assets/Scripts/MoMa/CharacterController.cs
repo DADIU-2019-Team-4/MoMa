@@ -60,12 +60,6 @@ namespace MoMa
                 // Find and load next Animation.Clip
                 Trajectory.Snippet snippet = GetCurrentSnippet();
                 _ac.LoadClip(this._rc.QueryClip(snippet));
-
-                // Draw current Trajectory.Snippet
-                _fc.DrawPath(snippet);
-
-                //Debug.Log(this._trajectory);
-                //Debug.Log(snippet);
             }
 
             // Play Animation.Frame

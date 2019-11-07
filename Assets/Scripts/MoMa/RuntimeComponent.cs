@@ -8,17 +8,18 @@ namespace MoMa
     public class RuntimeComponent
     {
         // Fine-tuning
-        public const float RecalculationThreshold = 0.2f; // The maximum diff of two Trajectories before recalculating the Animation
+        public const float RecalculationThreshold = 0.0f; // The maximum diff of two Trajectories before recalculating the Animation
         //public const float RecalculationThreshold = Mathf.Infinity; // The maximum diff of two Trajectories before recalculating the Animation
         public const int CooldownTime = 0; // Number of frames that a Frame is on cooldown after being played
-        public const int CandidateFramesSize = 50; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
-        public const int ClipBlendPoints = 0; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
+        public const int CandidateFramesSize = 500; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
+        public const int ClipBlendPoints = 1; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
+        public const float MaxTrajectoryDiff = 40f;
 
         // Frame/Point/Feature ratios
         // FeaturePoints % FeatureEveryPoints should be 0
         public const int SkipFrames = 3;  // Take 1 Frame every SkipFrames in the Animation file
-        public const int FeaturePoints = 3;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
-        public const int FeaturePastPoints = 2;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
+        public const int FeaturePoints = 4;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
+        public const int FeaturePastPoints = 4;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
         public const int FeatureEveryPoints = 2;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
         // FramesPerPoint % 2 should be 0
         public const int FramesPerPoint = 4;    // Animation.Frames per Trajectory.Point. The lower the number, the denser the Trajectory points will be.
@@ -37,7 +38,7 @@ namespace MoMa
         public RuntimeComponent(FollowerComponent fc)
         {
             // TODO: This should happen offline. Instead we only need to open its result
-            //this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
+            this._anim.Add(Packer.Pack("walk", "MoCapData", "walk_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("jog", "MoCapData", "jog3_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("acceleration", "MoCapData", "acceleration_DEFAULT_FIX"));
             this._anim.Add(Packer.Pack("run", "MoCapData", "Copy of run1_DEFAULT_FIX"));
@@ -75,7 +76,7 @@ namespace MoMa
             // 3. Construct the Clip, blend it with the current one and return it
             Animation.Clip nextClip = new Animation.Clip(
                 this._anim[this._currentAnimation].frameList.GetRange(
-                    this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum,
+                    this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum + FramesPerPoint,
                     FramesPerPoint * (FeaturePoints + ClipBlendPoints)
                     )
                 );
@@ -87,7 +88,6 @@ namespace MoMa
             PutOnCooldown(this._anim[this._currentAnimation].featureList[this._currentFeature]);
 
             return nextClip;
-
         }
 
         private (int, int) QueryFeature(Trajectory.Snippet currentSnippet)
@@ -112,10 +112,15 @@ namespace MoMa
                     if (feature.cooldownTimer == 0)
                     {
                         // A. Add candidate Feature to the best candidates list
-                        CandidateFeature candidateFeature = new CandidateFeature(
-                            feature, currentSnippet.CalcDiff(feature.snippet), i, j
-                            );
-                        candidateFeatures.Add(candidateFeature);
+                        float diff = currentSnippet.CalcDiff(feature.snippet);
+                        //Debug.Log("diff: " + diff);
+                        if (diff < MaxTrajectoryDiff)
+                        {
+                            CandidateFeature candidateFeature = new CandidateFeature(
+                                feature, diff, i, j
+                                );
+                            candidateFeatures.Add(candidateFeature);
+                        }
 
                         // B. Sort candidates based on their diff
                         candidateFeatures.Sort(
@@ -156,7 +161,7 @@ namespace MoMa
                     maxPoseVelocityDiff;
 
                 // TODO remove
-                this._fc.DrawAlternativePath(candidateFeatures[i].feature.snippet, i, candidateFeatures[i].trajectoryDiff);
+                //this._fc.DrawAlternativePath(candidateFeatures[i].feature.snippet, i, candidateFeatures[i].trajectoryDiff);
             }
 
             // 3. Normalize and add differences
@@ -173,6 +178,9 @@ namespace MoMa
             }
 
             Debug.Log("Starting animation: " + this._anim[winnerFeature.Item2.animationNum].animationName);
+
+            // TODO remove
+            this._fc.DrawAlternativePath(winnerFeature.Item2.feature.snippet, 1, winnerFeature.Item2.trajectoryDiff);
 
             // 4. Return the Feature's index
             return (winnerFeature.Item2.animationNum, winnerFeature.Item2.clipNum);

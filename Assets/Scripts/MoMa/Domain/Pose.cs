@@ -11,7 +11,9 @@ namespace MoMa
 
         public Pose(Frame frame)
         {
-            foreach (Bone.Type bone in new Bone.Type[] { Bone.Type.head, Bone.Type.leftFoot, Bone.Type.rightFoot, Bone.Type.leftHand, Bone.Type.rightHand} )
+            // TODO: Shall I re-include hands?
+            foreach (Bone.Type bone in new Bone.Type[] { Bone.Type.head, Bone.Type.leftFoot, Bone.Type.rightFoot, Bone.Type.leftHand, Bone.Type.rightHand })
+            //foreach (Bone.Type bone in new Bone.Type[] { Bone.Type.head, Bone.Type.leftFoot, Bone.Type.rightFoot} )
             {
                 limbDataDict.Add(bone, new Limb(frame.boneDataDict[bone].localPosition, frame.boneDataDict[bone].localVelocity));
             }

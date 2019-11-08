@@ -7,27 +7,6 @@ namespace MoMa
 {
     public class RuntimeComponent
     {
-        // Fine-tuning
-        public const float RecalculationThreshold = 0.0f; // The maximum diff of two Trajectories before recalculating the Animation
-        //public const float RecalculationThreshold = Mathf.Infinity; // The maximum diff of two Trajectories before recalculating the Animation
-        public const int CooldownTime = 0; // Number of frames that a Frame is on cooldown after being played
-        public const int CandidateFramesSize = 500; // Number of candidate frames for a transition (tradeoff: fidelity/speed)
-        public const int ClipBlendPoints = 1; // Each Animation Clip is blended with the next one for smoother transition. The are both played for this num of Frames
-        public const float MaxTrajectoryDiff = 40f;
-
-        // Frame/Point/Feature ratios
-        // FeaturePoints % FeatureEveryPoints should be 0
-        public const int SkipFrames = 3;  // Take 1 Frame every SkipFrames in the Animation file
-        public const int FeaturePoints = 4;  // Trajectory.Points per Feature. The lower the number, the shorter time the Feature covers
-        public const int FeaturePastPoints = 4;  // The number of Points in the past that is used in a Snippet. The lower the number, the lower the fidelity
-        public const int FeatureEveryPoints = 2;  // Trajectory.Points per Feature. The lower the nuber, the shorter time the Feature covers
-        // FramesPerPoint % 2 should be 0
-        public const int FramesPerPoint = 4;    // Animation.Frames per Trajectory.Point. The lower the number, the denser the Trajectory points will be.
-
-        public const int FramesPerFeature = FramesPerPoint * FeaturePoints;  // Animation.Frames per Feature
-        public const int FeatureStep = FeaturePoints / FeatureEveryPoints;  // Features overlap generally. This is the distance between two matching Features.
-        public const int SnippetSize = FeaturePoints + FeaturePastPoints;
-
         private List<Animation> _anim = new List<Animation>();
         private List<Feature> _onCooldown = new List<Feature>();
         private int _currentAnimation = 0;
@@ -57,11 +36,11 @@ namespace MoMa
 
             // 2. Check if the next Clip is fitting (or the first one, if we reach the end)
             // The next Clip is NOT necesserily the product of the next Feature
-            this._currentFeature = (this._currentFeature + FeatureStep) % this._anim[this._currentAnimation].featureList.Count;
+            this._currentFeature = (this._currentFeature + CharacterController.FeatureStep) % this._anim[this._currentAnimation].featureList.Count;
 
             float diff = currentSnippet.CalcDiff(this._anim[this._currentAnimation].featureList[this._currentFeature].snippet);
 
-            if (diff > RecalculationThreshold)
+            if (diff > CharacterController.RecalculationThreshold)
             {
                 (this._currentAnimation, this._currentFeature) = QueryFeature(currentSnippet);
 
@@ -76,8 +55,8 @@ namespace MoMa
             // 3. Construct the Clip, blend it with the current one and return it
             Animation.Clip nextClip = new Animation.Clip(
                 this._anim[this._currentAnimation].frameList.GetRange(
-                    this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum + FramesPerPoint,
-                    FramesPerPoint * (FeaturePoints + ClipBlendPoints)
+                    this._anim[this._currentAnimation].featureList[this._currentFeature].frameNum + CharacterController.FramesPerPoint,
+                    CharacterController.FramesPerPoint * (CharacterController.FeaturePoints + CharacterController.ClipBlendPoints)
                     )
                 );
 
@@ -114,7 +93,7 @@ namespace MoMa
                         // A. Add candidate Feature to the best candidates list
                         float diff = currentSnippet.CalcDiff(feature.snippet);
                         //Debug.Log("diff: " + diff);
-                        if (diff < MaxTrajectoryDiff)
+                        if (diff < CharacterController.MaxTrajectoryDiff)
                         {
                             CandidateFeature candidateFeature = new CandidateFeature(
                                 feature, diff, i, j
@@ -136,9 +115,9 @@ namespace MoMa
                             Debug.LogError("Unable to find any Animation Frame to transition to");
                             return (0, 0);
                         }
-                        else if (candidateFeatures.Count > CandidateFramesSize)
+                        else if (candidateFeatures.Count > CharacterController.CandidateFramesSize)
                         {
-                            candidateFeatures.RemoveRange(CandidateFramesSize, candidateFeatures.Count - CandidateFramesSize);
+                            candidateFeatures.RemoveRange(CharacterController.CandidateFramesSize, candidateFeatures.Count - CharacterController.CandidateFramesSize);
                         }
                     }
                 }
@@ -189,7 +168,7 @@ namespace MoMa
         private void PutOnCooldown(Feature feature)
         {
             _onCooldown.Add(feature);
-            feature.cooldownTimer = CooldownTime;
+            feature.cooldownTimer = CharacterController.CooldownTime;
         }
 
         private void ReduceCooldowns()

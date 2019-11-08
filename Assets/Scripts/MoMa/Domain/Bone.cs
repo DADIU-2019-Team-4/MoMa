@@ -66,6 +66,9 @@ public class Bone
             // TODO: Not sure if weight here is used correcltly
             this.rotation = Quaternion.Slerp(data.rotation, this.rotation, weight);
 
+            // Check head's rotation (in Euler)
+            //Debug.Log()
+
             this.localPosition = this.localPosition * (1 - weight) + data.localPosition * weight;
             this.localVelocity = this.localVelocity * (1 - weight) + data.localVelocity * weight;
 

@@ -38,12 +38,7 @@ namespace MoMa
                 //this._bones[bone].SetPositionAndRotation(frame.boneDataDict[bone].localPosition, frame.boneDataDict[bone].rotation);
 
                 // This keeps the rig's proportions
-
-                // TODO Remove if
-                if (bone != Bone.Type.head)
-                {
-                    this._bones[bone].rotation = frame.boneDataDict[bone].rotation;
-                }
+                this._bones[bone].rotation = frame.boneDataDict[bone].rotation;
             }
 
             this._model.localRotation = Quaternion.Inverse(frame.boneDataDict[Bone.Type.hips].rotation);

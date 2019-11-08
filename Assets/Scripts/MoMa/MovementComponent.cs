@@ -10,8 +10,8 @@ namespace MoMa
     {
         public const float DefaultDampTime = 1f;
         public const float StopDampTime = 3f;
-        public const float WalkingSpeed = 0.75f;
-        public const float RunningSpeed = 1.3f;
+        public const float WalkingSpeed = 0.70f;
+        public const float RunningSpeed = 1.15f;
         public const string ModelName = "Model";
 
         public int playerId = 0;
@@ -37,7 +37,7 @@ namespace MoMa
             // Get current input
             _direction.x = _player.GetAxisRaw("Move Horizontal");
             _direction.z = _player.GetAxisRaw("Move Vertical");
-            _direction.x = 1;
+            //_direction.x = 1;
             _direction.Normalize();
 
             this._speed = Input.GetKey(KeyCode.LeftShift) ?
